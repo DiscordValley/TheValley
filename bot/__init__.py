@@ -1,5 +1,3 @@
-import asyncio
-import random
 from pathlib import Path
 
 import discord
@@ -10,7 +8,9 @@ from bot.database.models import Guild
 
 __version__ = "0.1.0"
 
-invite_link = "https://discordapp.com/api/oauth2/authorize?client_id={}&scope=bot&permissions=0"
+invite_link = (
+    "https://discordapp.com/api/oauth2/authorize?client_id={}&scope=bot&permissions=0"
+)
 
 
 async def get_prefix(_bot, message):

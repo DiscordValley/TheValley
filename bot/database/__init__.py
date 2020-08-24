@@ -26,7 +26,7 @@ async def shutdown():
 
 async def query_guild(guild_id: int):
     """query guild, create if not exist"""
-    guild = await models.Guild.get(guild_id)
+    guild = await models.Guild.get(guild_id)  # noqa
     if guild is None:
-        guild = await models.Guild.create(id=guild_id)
+        guild = await models.Guild.create(id=guild_id)  # noqa
     return guild

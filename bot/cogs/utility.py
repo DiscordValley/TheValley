@@ -7,7 +7,9 @@ from discord.ext import commands
 
 from bot import utils
 
-PY_VERSION = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+PY_VERSION = (
+    f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+)
 
 
 class Utility(commands.Cog):
@@ -66,10 +68,8 @@ class Utility(commands.Cog):
             inline=False,
         )
         embed.add_field(
-            name=f"Server Configuration",
-            value=f"```\n"
-            f"Prefix: {utils.config.prefix}\n"
-            f"```",
+            name="Server Configuration",
+            value=f"```\n" f"Prefix: {utils.config.prefix}\n" f"```",
             inline=False,
         )
         embed.add_field(
@@ -81,11 +81,12 @@ class Utility(commands.Cog):
             inline=False,
         )
         embed.add_field(
-            name="Links",
-            value=f"[Invite]({self.bot.invite})",
-            inline=False,
+            name="Links", value=f"[Invite]({self.bot.invite})", inline=False,
         )
-        embed.set_footer(text="Thank you for using DiscordValley <3", icon_url=self.bot.user.avatar_url)
+        embed.set_footer(
+            text="Thank you for using DiscordValley <3",
+            icon_url=self.bot.user.avatar_url,
+        )
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["socials", "links", "support"])
@@ -95,7 +96,10 @@ class Utility(commands.Cog):
         **Example**: `{prefix}invite`"""
         embed = discord.Embed()
         embed.description = f"[Invite]({self.bot.invite})"
-        embed.set_footer(text="Thank you for using DiscordValley <3", icon_url=self.bot.user.avatar_url)
+        embed.set_footer(
+            text="Thank you for using DiscordValley <3",
+            icon_url=self.bot.user.avatar_url,
+        )
         await ctx.send(embed=embed)
 
 
