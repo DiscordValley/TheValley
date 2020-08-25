@@ -133,3 +133,5 @@ dmypy.json
 # TEMPLATE END
 config.json
 
+
+.idea/
