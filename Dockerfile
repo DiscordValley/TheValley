@@ -10,4 +10,3 @@ WORKDIR /code
 RUN pip install pipenv
 COPY . /code/
 RUN pipenv install
-RUN pipenv run alembic upgrade head
