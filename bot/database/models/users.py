@@ -11,4 +11,4 @@ class Users(db.Model):
     farm_id = db.Column(db.BIGINT)
     energy = db.Column(db.Integer)
     last_visit = db.Column(db.DateTime)
-    allow_notif = db.Column(db.Bool)
+    allow_notif = db.Column(db.Boolean)

@@ -1,0 +1,5 @@
+{
+  "token": "TOKEN",
+  "prefix": ";",
+  "database": "postgresql://postgres:postgres@localhost/bot"
+}
