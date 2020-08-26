@@ -2,7 +2,9 @@ import discord
 from discord.ext import commands
 
 
-FARMLAND_NOT_FOUND = discord.Embed(description="The farmland specified was not recognized. Please try again.")
+FARMLAND_NOT_FOUND = discord.Embed(
+    description="The farmland specified was not recognized. Please try again."
+)
 
 
 class Farming(commands.Cog):
@@ -19,22 +21,23 @@ class Farming(commands.Cog):
         *Harvest your crops.*
         Example:
             {prefix}harvest <crops>
-
         <crops> is optional, and can also be multiple arguments.
-        Rows are enumerated starting at '1'. Columns are labeled starting at 'a'.
+        Rows are enumerated starting at '1'.
+        Columns are labeled starting at 'a'.
         Example with 0's instead of farmland:
            a   b   c
-         1 0   0   0
-         2 0   0   0
-         3 0   0   0
-
-         <crops> can be a row, column or a specific crop specified by row number followed by column label
-         (for example a1 for the top left crop.)
-         If <crops> is not specified, all crops will be harvested.
-         """
-
-        plot_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
-                         [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        1  0   0   0
+        2  0   0   0
+        3  0   0   0
+        <crops> can be a row, column or a specific crop.
+        Specific crop is specified by row number followed by column label.
+        (for example a1 for the top left crop.)
+        If <crops> is not specified, all crops will be harvested.
+        """
+        plot_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0],
+                         [0, 0, 0], [0, 0, 0], [0, 0, 0],
+                         [0, 0, 0], [0, 0, 0], [0, 0, 0],
+                         [0, 0, 0], [0, 0, 0]]
         if args:
             for arg in args:
                 if len(arg) == 1:
@@ -43,7 +46,7 @@ class Farming(commands.Cog):
                     except TypeError:
                         await ctx.send(embed=FARMLAND_NOT_FOUND)
                         return
-                    if uni_value is not 0:
+                    if uni_value != 0:
                         if 48 < uni_value < 58:
                             for i in range(0, len(plot_template[int(arg)-1])):
                                 plot_template[int(arg) - 1][i] = 1
@@ -111,22 +114,22 @@ class Farming(commands.Cog):
     @commands.command()
     async def water(self, ctx, *args):
         """
-                *Water your crops.*
-                Example:
-                    {prefix}water <crops>
-
-                <crops> is optional, and can also be multiple arguments.
-                Rows are enumerated starting at '1'. Columns are labeled starting at 'a'.
-                Example with 0's instead of farmland:
-                   a   b   c
-                 1 0   0   0
-                 2 0   0   0
-                 3 0   0   0
-
-                 <crops> can be a row, column or a specific crop specified by row number followed by column label
-                 (for example a1 for the top left crop.)
-                 If <crops> is not specified, all crops will be harvested.
-                 """
+        *Water your crops.*
+        Example:
+            {prefix}water <crops>
+        <crops> is optional, and can also be multiple arguments.
+        Rows are enumerated starting at '1'.
+        Columns are labeled starting at 'a'.
+        Example with 0's instead of farmland:
+           a   b   c
+        1  0   0   0
+        2  0   0   0
+        3  0   0   0
+        <crops> can be a row, column or a specific crop.
+        Specific crop is specified by row number followed by column label.
+        (for example a1 for the top left crop.)
+        If <crops> is not specified, all crops will be watered.
+        """
 
         plot_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
                          [0, 0, 0], [0, 0, 0], [0, 0, 0]]
@@ -138,7 +141,7 @@ class Farming(commands.Cog):
                     except TypeError:
                         await ctx.send(embed=FARMLAND_NOT_FOUND)
                         return
-                    if uni_value is not 0:
+                    if uni_value != 0:
                         if 48 < uni_value < 58:
                             for i in range(0, len(plot_template[int(arg) - 1])):
                                 plot_template[int(arg) - 1][i] = 1
@@ -206,22 +209,22 @@ class Farming(commands.Cog):
     @commands.command()
     async def plant(self, ctx, *args):
         """
-                *Plant your crops.*
-                Example:
-                    {prefix}plant <crops>
-
-                <crops> is optional, and can also be multiple arguments.
-                Rows are enumerated starting at '1'. Columns are labeled starting at 'a'.
-                Example with 0's instead of farmland:
-                   a   b   c
-                 1 0   0   0
-                 2 0   0   0
-                 3 0   0   0
-
-                 <crops> can be a row, column or a specific crop specified by row number followed by column label
-                 (for example a1 for the top left crop.)
-                 If <crops> is not specified, all crops will be harvested.
-                 """
+        *Plant your crops.*
+        Example:
+            {prefix}plant <crops>
+        <crops> is optional, and can also be multiple arguments.
+        Rows are enumerated starting at '1'.
+        Columns are labeled starting at 'a'.
+        Example with 0's instead of farmland:
+           a   b   c
+        1  0   0   0
+        2  0   0   0
+        3  0   0   0
+        <crops> can be a row, column or a specific crop.
+        Specific crop is specified by row number followed by column label.
+        (for example a1 for the top left crop.)
+        If <crops> is not specified, all crops will be planted.
+        """
 
         plot_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
                          [0, 0, 0], [0, 0, 0], [0, 0, 0]]
@@ -233,7 +236,7 @@ class Farming(commands.Cog):
                     except TypeError:
                         await ctx.send(embed=FARMLAND_NOT_FOUND)
                         return
-                    if uni_value is not 0:
+                    if uni_value != 0:
                         if 48 < uni_value < 58:
                             for i in range(0, len(plot_template[int(arg) - 1])):
                                 plot_template[int(arg) - 1][i] = 1
