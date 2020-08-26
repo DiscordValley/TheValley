@@ -1,0 +1,19 @@
+version: '3'
+volumes:
+  postgres_volume:
+services:
+  db:
+    image: postgres
+    env_file:
+      .env
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+  bot:
+    build: .
+    command: pipenv run python run.py
+    volumes:
+      - .:/code
+    depends_on:
+      - db
