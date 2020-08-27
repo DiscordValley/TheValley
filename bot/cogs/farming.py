@@ -2,9 +2,43 @@ import discord
 from discord.ext import commands
 
 
-FARMLAND_NOT_FOUND = discord.Embed(
-    description="The farmland specified was not recognized. Please try again."
+import re
+
+
+PLOT_NOT_FOUND = discord.Embed(
+    description="The plot specified was not recognized. Please try again."
 )
+
+
+class PlotCoordinates:
+    def __init__(self, argument=None):
+        match1 = re.match(r"([0-9]+)([A-Za-z]+)", argument, re.I)
+        match2 = re.match(r"([A-Za-z]+)([0-9]+)", argument, re.I)
+        if match1:
+            rc_list = match1.groups()
+            row = int(rc_list[0])
+            column = rc_list[1]
+        elif match2:
+            rc_list = match2.groups()
+            column = rc_list[0]
+            row = int(rc_list[1])
+        else:
+            match1 = re.match(r"[A-Za-z]+", argument, re.I)
+            match2 = re.match(r"\d+", argument, re.I)
+            if match1:
+                rc_list = match1.group()
+                column = rc_list[0]
+                row = None
+            elif match2:
+                rc_list = match2.group()
+                row = int(rc_list)
+                column = None
+            else:
+                row = None
+                column = None
+
+        self.row = row
+        self.column = ord(column.lower()) - 96 if column else None
 
 
 class Farming(commands.Cog):
@@ -19,287 +53,201 @@ class Farming(commands.Cog):
     async def harvest(self, ctx, *args):
         """
         *Harvest your crops.*
-        Example:
-            {prefix}harvest <crops>
-        <crops> is optional, and can also be multiple arguments.
+        Usage:
+            {prefix}harvest <plots>
+        <plots> is optional, and can also be multiple arguments.
         Rows are enumerated starting at '1'.
         Columns are labeled starting at 'a'.
-        Example with 0's instead of farmland:
+        Example with 0's instead of plots:
            a   b   c
         1  0   0   0
         2  0   0   0
         3  0   0   0
-        <crops> can be a row, column or a specific crop.
-        Specific crop is specified by row number followed by column label.
-        (for example a1 for the top left crop.)
-        If <crops> is not specified, all crops will be harvested.
+        <plots> can be a row, column or a specific plot.
+        Specific plot is specified by row number followed by column label.
+        (for example a1 for the top left plot.)
+        If <plots> is not specified, all plots will be harvested.
         """
-        plot_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0],
-                         [0, 0, 0], [0, 0, 0], [0, 0, 0],
-                         [0, 0, 0], [0, 0, 0], [0, 0, 0],
-                         [0, 0, 0], [0, 0, 0]]
+        farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         if args:
+            rc_list = []
+            len_col = len(farm_template)
+            len_row = len(farm_template[0])
             for arg in args:
-                if len(arg) == 1:
-                    try:
-                        uni_value = ord(arg.lower())
-                    except TypeError:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
+                rc_list.append(PlotCoordinates(argument=arg))
+                # Check to see if each row-column pair is valid. Give Error if not.
+                for rc in rc_list:
+                    if not self.check_plot_validity(farm_template, rc):
+                        await ctx.send(embed=PLOT_NOT_FOUND)
                         return
-                    if uni_value != 0:
-                        if 48 < uni_value < 58:
-                            for i in range(0, len(plot_template[int(arg)-1])):
-                                plot_template[int(arg) - 1][i] = 1
-                        elif 96 < uni_value < 123:
-                            column_num = uni_value - 97
-                            for row in plot_template:
-                                row[column_num] = 1
-                        else:
-                            await ctx.send(embed=FARMLAND_NOT_FOUND)
-                            return
-                elif len(arg) == 2:
-                    try:
-                        uni_value1 = ord(arg[0].lower())
-                        uni_value2 = ord(arg[1].lower())
-                    except TypeError:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
-                        return
-                    if (48 < uni_value1 < 58) or (96 < uni_value1 < 123):
-                        if (48 < uni_value2 < 58) or (96 < uni_value2 < 123):
-                            n = True if 48 < uni_value1 < 58 else False
-                            m = True if 48 < uni_value2 < 58 else False
-                            if n is not m:
-                                if n:
-                                    plot_template[uni_value1 - 49][uni_value2 - 97] = 1
-                                else:
-                                    plot_template[uni_value1 - 97][uni_value2 - 49] = 1
-                            elif n and m:
-                                for i in range(0, len(plot_template[int(arg) - 1])):
-                                    plot_template[int(arg) - 1][i] = 1
-                            else:
-                                await ctx.send(embed=FARMLAND_NOT_FOUND)
-                                return
-                        else:
-                            await ctx.send(embed=FARMLAND_NOT_FOUND)
-                            return
-                    else:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
-                        return
-                elif len(arg) == 3:
-                    uni_value1 = 0
-                    uni_value2 = 0
-                    uni_value3 = 0
-                    try:
-                        uni_value1 = ord(arg[0].lower())
-                        uni_value2 = ord(arg[1].lower())
-                        uni_value3 = ord(arg[2].lower())
-                    except TypeError:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
-                    if (48 < uni_value1 < 58) and (48 < uni_value2 < 58) and (96 < uni_value3 < 123):
-                        plot_template[int(arg[:2])-1][uni_value3 - 97] = 1
-                    elif (96 < uni_value1 < 123) and (48 < uni_value2 < 58) and (48 < uni_value3 < 58):
-                        plot_template[int(arg[1:3])-1][uni_value1 - 97] = 1
-                    else:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
+            for rc in rc_list:
+                if bool(rc.row) and bool(rc.column):
+                    farm_template[rc.row - 1][rc.column - 1] = 1   # Should be function which harvests a single plot.
+                elif rc.row:
+                    for i in range(len(farm_template[rc.row])):
+                        farm_template[rc.row - 1][i] = 1  # Should be function which harvests a single plot.
                 else:
-                    await ctx.send(embed=FARMLAND_NOT_FOUND)
-                    return
+                    for i in range(len(farm_template)):
+                        farm_template[i][rc.column - 1] = 1  # Should be function which harvests a single plot.
         else:
-            for row in plot_template:
+            for row in farm_template:
                 for i in range(0, len(row)):
-                    row[i] = 1             # Should be function which harvests a single farmland.
-        for row in plot_template:
-            print(row)
+                    row[i] = 1             # Should be function which harvests a single plot.
+        output_str = ""
+        # Show
+        for row in farm_template:
+            for plot in row[:-1]:
+                if plot == 1:
+                    output_str += str(plot) + "--"
+                else:
+                    output_str += str(plot) + "-"
+            else:
+                if row[-1] == 1:
+                    output_str += str(row[-1])
+                else:
+                    output_str += str(row[-1])
+
+            output_str += "\n"
+        await ctx.send(embed=discord.Embed(title="Current Farm", description=output_str))
 
     @commands.command()
     async def water(self, ctx, *args):
         """
         *Water your crops.*
-        Example:
-            {prefix}water <crops>
-        <crops> is optional, and can also be multiple arguments.
+        Usage:
+            {prefix}water <plots>
+        <plots> is optional, and can also be multiple arguments.
         Rows are enumerated starting at '1'.
         Columns are labeled starting at 'a'.
-        Example with 0's instead of farmland:
+        Example with 0's instead of plots:
            a   b   c
         1  0   0   0
         2  0   0   0
         3  0   0   0
-        <crops> can be a row, column or a specific crop.
-        Specific crop is specified by row number followed by column label.
-        (for example a1 for the top left crop.)
-        If <crops> is not specified, all crops will be watered.
+        <plots> can be a row, column or a specific plot.
+        Specific plot is specified by row number followed by column label.
+        (for example a1 for the top left plot.)
+        If <plots> is not specified, all plots will be watered.
         """
-
-        plot_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
-                         [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         if args:
+            rc_list = []
+            len_col = len(farm_template)
+            len_row = len(farm_template[0])
             for arg in args:
-                if len(arg) == 1:
-                    try:
-                        uni_value = ord(arg.lower())
-                    except TypeError:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
+                rc_list.append(PlotCoordinates(argument=arg))
+                # Check to see if each row-column pair is valid. Give Error if not.
+                for rc in rc_list:
+                    if not self.check_plot_validity(farm_template, rc):
+                        await ctx.send(embed=PLOT_NOT_FOUND)
                         return
-                    if uni_value != 0:
-                        if 48 < uni_value < 58:
-                            for i in range(0, len(plot_template[int(arg) - 1])):
-                                plot_template[int(arg) - 1][i] = 1
-                        elif 96 < uni_value < 123:
-                            column_num = uni_value - 97
-                            for row in plot_template:
-                                row[column_num] = 1
-                        else:
-                            await ctx.send(embed=FARMLAND_NOT_FOUND)
-                            return
-                elif len(arg) == 2:
-                    try:
-                        uni_value1 = ord(arg[0].lower())
-                        uni_value2 = ord(arg[1].lower())
-                    except TypeError:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
-                        return
-                    if (48 < uni_value1 < 58) or (96 < uni_value1 < 123):
-                        if (48 < uni_value2 < 58) or (96 < uni_value2 < 123):
-                            n = True if 48 < uni_value1 < 58 else False
-                            m = True if 48 < uni_value2 < 58 else False
-                            if n is not m:
-                                if n:
-                                    plot_template[uni_value1 - 49][uni_value2 - 97] = 1
-                                else:
-                                    plot_template[uni_value1 - 97][uni_value2 - 49] = 1
-                            elif n and m:
-                                for i in range(0, len(plot_template[int(arg) - 1])):
-                                    plot_template[int(arg) - 1][i] = 1
-                            else:
-                                await ctx.send(embed=FARMLAND_NOT_FOUND)
-                                return
-                        else:
-                            await ctx.send(embed=FARMLAND_NOT_FOUND)
-                            return
-                    else:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
-                        return
-                elif len(arg) == 3:
-                    uni_value1 = 0
-                    uni_value2 = 0
-                    uni_value3 = 0
-                    try:
-                        uni_value1 = ord(arg[0].lower())
-                        uni_value2 = ord(arg[1].lower())
-                        uni_value3 = ord(arg[2].lower())
-                    except TypeError:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
-                    if (48 < uni_value1 < 58) and (48 < uni_value2 < 58) and (96 < uni_value3 < 123):
-                        plot_template[int(arg[:2]) - 1][uni_value3 - 97] = 1
-                    elif (96 < uni_value1 < 123) and (48 < uni_value2 < 58) and (48 < uni_value3 < 58):
-                        plot_template[int(arg[1:3]) - 1][uni_value1 - 97] = 1
-                    else:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
+
+            for rc in rc_list:
+                if bool(rc.row) and bool(rc.column):
+                    farm_template[rc.row - 1][rc.column - 1] = 1   # Should be function which waters a single plot.
+                elif rc.row:
+                    for i in range(len(farm_template[rc.row])):
+                        farm_template[rc.row - 1][i] = 1  # Should be function which waters a single plot.
                 else:
-                    await ctx.send(embed=FARMLAND_NOT_FOUND)
-                    return
+                    for i in range(len(farm_template)):
+                        farm_template[i][rc.column - 1] = 1  # Should be function which waters a single plot.
         else:
-            for row in plot_template:
+            for row in farm_template:
                 for i in range(0, len(row)):
-                    row[i] = 1  # Should be function which waters a single farmland.
-        for row in plot_template:
-            print(row)
+                    row[i] = 1             # Should be function which waters a single plot.
+        output_str = ""
+        # Should be function to show entire plot.
+        for row in farm_template:
+            for plot in row[:-1]:
+                if plot == 1:
+                    output_str += str(plot) + "--"
+                else:
+                    output_str += str(plot) + "-"
+            else:
+                if row[-1] == 1:
+                    output_str += str(row[-1])
+                else:
+                    output_str += str(row[-1])
+
+            output_str += "\n"
+        await ctx.send(embed=discord.Embed(title="Current Farm", description=output_str))
 
     @commands.command()
     async def plant(self, ctx, *args):
         """
         *Plant your crops.*
-        Example:
-            {prefix}plant <crops>
-        <crops> is optional, and can also be multiple arguments.
+        Usage:
+            {prefix}plant <plots>
+        <plots> is optional, and can also be multiple arguments.
         Rows are enumerated starting at '1'.
         Columns are labeled starting at 'a'.
-        Example with 0's instead of farmland:
+        Example with 0's instead of plots:
            a   b   c
         1  0   0   0
         2  0   0   0
         3  0   0   0
-        <crops> can be a row, column or a specific crop.
-        Specific crop is specified by row number followed by column label.
-        (for example a1 for the top left crop.)
-        If <crops> is not specified, all crops will be planted.
+        <plots> can be a row, column or a specific plot.
+        Specific plot is specified by row number followed by column label.
+        (for example a1 for the top left plot.)
+        If <plots> is not specified, all plots will be planted.
         """
-
-        plot_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
-                         [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         if args:
+            rc_list = []
+            len_col = len(farm_template)
+            len_row = len(farm_template[0])
             for arg in args:
-                if len(arg) == 1:
-                    try:
-                        uni_value = ord(arg.lower())
-                    except TypeError:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
+                rc_list.append(PlotCoordinates(argument=arg))
+                # Check to see if each row-column pair is valid. Give Error if not.
+                for rc in rc_list:
+                    if not self.check_plot_validity(farm_template, rc):
+                        await ctx.send(embed=PLOT_NOT_FOUND)
                         return
-                    if uni_value != 0:
-                        if 48 < uni_value < 58:
-                            for i in range(0, len(plot_template[int(arg) - 1])):
-                                plot_template[int(arg) - 1][i] = 1
-                        elif 96 < uni_value < 123:
-                            column_num = uni_value - 97
-                            for row in plot_template:
-                                row[column_num] = 1
-                        else:
-                            await ctx.send(embed=FARMLAND_NOT_FOUND)
-                            return
-                elif len(arg) == 2:
-                    try:
-                        uni_value1 = ord(arg[0].lower())
-                        uni_value2 = ord(arg[1].lower())
-                    except TypeError:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
-                        return
-                    if (48 < uni_value1 < 58) or (96 < uni_value1 < 123):
-                        if (48 < uni_value2 < 58) or (96 < uni_value2 < 123):
-                            n = True if 48 < uni_value1 < 58 else False
-                            m = True if 48 < uni_value2 < 58 else False
-                            if n is not m:
-                                if n:
-                                    plot_template[uni_value1 - 49][uni_value2 - 97] = 1
-                                else:
-                                    plot_template[uni_value1 - 97][uni_value2 - 49] = 1
-                            elif n and m:
-                                for i in range(0, len(plot_template[int(arg) - 1])):
-                                    plot_template[int(arg) - 1][i] = 1
-                            else:
-                                await ctx.send(embed=FARMLAND_NOT_FOUND)
-                                return
-                        else:
-                            await ctx.send(embed=FARMLAND_NOT_FOUND)
-                            return
-                    else:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
-                        return
-                elif len(arg) == 3:
-                    uni_value1 = 0
-                    uni_value2 = 0
-                    uni_value3 = 0
-                    try:
-                        uni_value1 = ord(arg[0].lower())
-                        uni_value2 = ord(arg[1].lower())
-                        uni_value3 = ord(arg[2].lower())
-                    except TypeError:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
-                    if (48 < uni_value1 < 58) and (48 < uni_value2 < 58) and (96 < uni_value3 < 123):
-                        plot_template[int(arg[:2]) - 1][uni_value3 - 97] = 1
-                    elif (96 < uni_value1 < 123) and (48 < uni_value2 < 58) and (48 < uni_value3 < 58):
-                        plot_template[int(arg[1:3]) - 1][uni_value1 - 97] = 1
-                    else:
-                        await ctx.send(embed=FARMLAND_NOT_FOUND)
+
+            for rc in rc_list:
+                if bool(rc.row) and bool(rc.column):
+                    farm_template[rc.row - 1][rc.column - 1] = 1   # Should be function which plants a single plot.
+                elif rc.row:
+                    for i in range(len_row):
+                        farm_template[rc.row - 1][i] = 1  # Should be function which plants a single plot.
                 else:
-                    await ctx.send(embed=FARMLAND_NOT_FOUND)
-                    return
+                    for i in range(len_col):
+                        farm_template[i][rc.column - 1] = 1  # Should be function which plants a single plot.
         else:
-            for row in plot_template:
+            for row in farm_template:
                 for i in range(0, len(row)):
-                    row[i] = 1  # Should be function which plants a single farmland.
-        for row in plot_template:
-            print(row)
+                    row[i] = 1             # Should be function which plants a single plot.
+        output_str = ""
+        # Should be function to show entire plot.
+        for row in farm_template:
+            for plot in row[:-1]:
+                if plot == 1:
+                    output_str += str(plot) + "--"
+                else:
+                    output_str += str(plot) + "-"
+            else:
+                if row[-1] == 1:
+                    output_str += str(row[-1])
+                else:
+                    output_str += str(row[-1])
+
+            output_str += "\n"
+        await ctx.send(embed=discord.Embed(title="Current Farm", description=output_str))
+
+    @staticmethod
+    def check_plot_validity(farm: list, plot: PlotCoordinates):
+        len_col = len(farm)
+        len_row = len(farm[0])
+
+        if not plot.row and not plot.column:
+            return False
+        if plot.row:
+            if plot.row > len_col:
+                return False
+        if plot.column:
+            if plot.column > len_row:
+                return False
+        return True
 
 
 def setup(bot):
