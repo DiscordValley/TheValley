@@ -82,23 +82,21 @@ class Farming(commands.Cog):
                         return
             for rc in rc_list:
                 if bool(rc.row) and bool(rc.column):
-                    farm_template[rc.row - 1][
-                        rc.column - 1
-                    ] = 1  # Should be function which harvests a single plot.
+                    # Should be function which harvests a single plot.
+                    farm_template[rc.row - 1][rc.column - 1] = 1
                 elif rc.row:
                     for i in range(len_row):
-                        farm_template[rc.row - 1][
-                            i
-                        ] = 1  # Should be function which harvests a single plot.
+                        # Should be function which harvests a single plot.
+                        farm_template[rc.row - 1][i] = 1
                 else:
                     for i in range(len_col):
-                        farm_template[i][
-                            rc.column - 1
-                        ] = 1  # Should be function which harvests a single plot.
+                        # Should be function which harvests a single plot.
+                        farm_template[i][rc.column - 1] = 1
         else:
             for row in farm_template:
                 for i in range(0, len(row)):
-                    row[i] = 1  # Should be function which harvests a single plot.
+                    # Should be function which harvests a single plot.
+                    row[i] = 1
         output_str = ""
         # Show
         for row in farm_template:
