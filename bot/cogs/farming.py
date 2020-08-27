@@ -81,13 +81,13 @@ class Farming(commands.Cog):
         (for example a1 for the top left plot.)
         If <plots> is not specified, all plots will be harvested.
         """
-        farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        farm = self.get_farm()
         if plots:
             rc_list = []
-            height = len(farm_template)
-            width = len(farm_template[0])
+            height = len(farm)
+            width = len(farm[0])
             for rc in plots:
-                if self.check_plot_validity(farm_template, rc):
+                if self.check_plot_validity(farm, rc):
                     if rc.row and rc.column:
                         rc_list.append(rc)
                     elif rc.row:
@@ -99,11 +99,11 @@ class Farming(commands.Cog):
                 else:
                     await ctx.send(embed=PLOT_NOT_FOUND)
                     return
-            farm_template = self.work_plots(farm_template, PlotActions.HARVEST, rc_list)
+            farm = self.work_plots(farm, PlotActions.HARVEST, rc_list)
         else:
-            farm_template = self.work_plots(farm_template, PlotActions.HARVEST)
+            farm = self.work_plots(farm, PlotActions.HARVEST)
 
-        await self.display_farm(ctx, farm_template)
+        await self.display_farm(ctx, farm)
 
     @commands.command()
     async def water(self, ctx, plots: commands.Greedy[PlotCoordinateConverter]):
@@ -124,13 +124,13 @@ class Farming(commands.Cog):
         (for example a1 for the top left plot.)
         If <plots> is not specified, all plots will be watered.
         """
-        farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        farm = self.get_farm()
         if plots:
             rc_list = []
-            height = len(farm_template)
-            width = len(farm_template[0])
+            height = len(farm)
+            width = len(farm[0])
             for rc in plots:
-                if self.check_plot_validity(farm_template, rc):
+                if self.check_plot_validity(farm, rc):
                     if rc.row and rc.column:
                         rc_list.append(rc)
                     elif rc.row:
@@ -142,11 +142,11 @@ class Farming(commands.Cog):
                 else:
                     await ctx.send(embed=PLOT_NOT_FOUND)
                     return
-            farm_template = self.work_plots(farm_template, PlotActions.WATER, rc_list)
+            farm = self.work_plots(farm, PlotActions.WATER, rc_list)
         else:
-            farm_template = self.work_plots(farm_template, PlotActions.WATER)
+            farm = self.work_plots(farm, PlotActions.WATER)
 
-        await self.display_farm(ctx, farm_template)
+        await self.display_farm(ctx, farm)
 
     @commands.command()
     async def plant(self, ctx, plots: commands.Greedy[PlotCoordinateConverter]):
@@ -167,13 +167,13 @@ class Farming(commands.Cog):
         (for example a1 for the top left plot.)
         If <plots> is not specified, all plots will be planted.
         """
-        farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        farm = self.get_farm()
         if plots:
             rc_list = []
-            height = len(farm_template)
-            width = len(farm_template[0])
+            height = len(farm)
+            width = len(farm[0])
             for rc in plots:
-                if self.check_plot_validity(farm_template, rc):
+                if self.check_plot_validity(farm, rc):
                     if rc.row and rc.column:
                         rc_list.append(rc)
                     elif rc.row:
@@ -185,11 +185,11 @@ class Farming(commands.Cog):
                 else:
                     await ctx.send(embed=PLOT_NOT_FOUND)
                     return
-            farm_template = self.work_plots(farm_template, PlotActions.PLANT, rc_list)
+            farm = self.work_plots(farm, PlotActions.PLANT, rc_list)
         else:
-            farm_template = self.work_plots(farm_template, PlotActions.PLANT)
+            farm = self.work_plots(farm, PlotActions.PLANT)
 
-        await self.display_farm(ctx, farm_template)
+        await self.display_farm(ctx, farm)
 
     @staticmethod
     def check_plot_validity(farm: list, plot):
@@ -206,7 +206,8 @@ class Farming(commands.Cog):
                 return False
         return True
 
-    async def display_farm(self, ctx, farm):
+    @staticmethod
+    async def display_farm(ctx, farm):
         output_str = ""
         for row in farm:
             for plot in row[:-1]:
@@ -224,6 +225,11 @@ class Farming(commands.Cog):
         await ctx.send(
             embed=discord.Embed(title="Current Farm", description=output_str)
         )
+
+    @staticmethod
+    def get_farm():
+        farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        return farm_template
 
     @staticmethod
     def work_plots(farm: list, action: PlotActions, plots: List[PlotCoordinate] = None):
