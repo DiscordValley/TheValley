@@ -84,10 +84,10 @@ class Farming(commands.Cog):
                 if bool(rc.row) and bool(rc.column):
                     farm_template[rc.row - 1][rc.column - 1] = 1   # Should be function which harvests a single plot.
                 elif rc.row:
-                    for i in range(len(farm_template[rc.row])):
+                    for i in range(len_row):
                         farm_template[rc.row - 1][i] = 1  # Should be function which harvests a single plot.
                 else:
-                    for i in range(len(farm_template)):
+                    for i in range(len_col):
                         farm_template[i][rc.column - 1] = 1  # Should be function which harvests a single plot.
         else:
             for row in farm_template:
@@ -146,10 +146,10 @@ class Farming(commands.Cog):
                 if bool(rc.row) and bool(rc.column):
                     farm_template[rc.row - 1][rc.column - 1] = 1   # Should be function which waters a single plot.
                 elif rc.row:
-                    for i in range(len(farm_template[rc.row])):
+                    for i in range(len_row):
                         farm_template[rc.row - 1][i] = 1  # Should be function which waters a single plot.
                 else:
-                    for i in range(len(farm_template)):
+                    for i in range(len_col):
                         farm_template[i][rc.column - 1] = 1  # Should be function which waters a single plot.
         else:
             for row in farm_template:
