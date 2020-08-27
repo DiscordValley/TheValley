@@ -47,7 +47,7 @@ class Farming(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f'{type(self).__name__} Cog ready.')
+        print(f"{type(self).__name__} Cog ready.")
 
     @commands.command()
     async def harvest(self, ctx, *args):
@@ -82,17 +82,23 @@ class Farming(commands.Cog):
                         return
             for rc in rc_list:
                 if bool(rc.row) and bool(rc.column):
-                    farm_template[rc.row - 1][rc.column - 1] = 1   # Should be function which harvests a single plot.
+                    farm_template[rc.row - 1][
+                        rc.column - 1
+                    ] = 1  # Should be function which harvests a single plot.
                 elif rc.row:
                     for i in range(len_row):
-                        farm_template[rc.row - 1][i] = 1  # Should be function which harvests a single plot.
+                        farm_template[rc.row - 1][
+                            i
+                        ] = 1  # Should be function which harvests a single plot.
                 else:
                     for i in range(len_col):
-                        farm_template[i][rc.column - 1] = 1  # Should be function which harvests a single plot.
+                        farm_template[i][
+                            rc.column - 1
+                        ] = 1  # Should be function which harvests a single plot.
         else:
             for row in farm_template:
                 for i in range(0, len(row)):
-                    row[i] = 1             # Should be function which harvests a single plot.
+                    row[i] = 1  # Should be function which harvests a single plot.
         output_str = ""
         # Show
         for row in farm_template:
@@ -108,7 +114,9 @@ class Farming(commands.Cog):
                     output_str += str(row[-1])
 
             output_str += "\n"
-        await ctx.send(embed=discord.Embed(title="Current Farm", description=output_str))
+        await ctx.send(
+            embed=discord.Embed(title="Current Farm", description=output_str)
+        )
 
     @commands.command()
     async def water(self, ctx, *args):
@@ -144,17 +152,21 @@ class Farming(commands.Cog):
 
             for rc in rc_list:
                 if bool(rc.row) and bool(rc.column):
-                    farm_template[rc.row - 1][rc.column - 1] = 1   # Should be function which waters a single plot.
+                    # Should be function which waters a single plot.
+                    farm_template[rc.row - 1][rc.column - 1] = 1
                 elif rc.row:
                     for i in range(len_row):
-                        farm_template[rc.row - 1][i] = 1  # Should be function which waters a single plot.
+                        # Should be function which waters a single plot.
+                        farm_template[rc.row - 1][i] = 1
                 else:
                     for i in range(len_col):
-                        farm_template[i][rc.column - 1] = 1  # Should be function which waters a single plot.
+                        # Should be function which waters a single plot.
+                        farm_template[i][rc.column - 1] = 1
         else:
             for row in farm_template:
                 for i in range(0, len(row)):
-                    row[i] = 1             # Should be function which waters a single plot.
+                    # Should be function which waters a single plot.
+                    row[i] = 1
         output_str = ""
         # Should be function to show entire plot.
         for row in farm_template:
@@ -170,7 +182,9 @@ class Farming(commands.Cog):
                     output_str += str(row[-1])
 
             output_str += "\n"
-        await ctx.send(embed=discord.Embed(title="Current Farm", description=output_str))
+        await ctx.send(
+            embed=discord.Embed(title="Current Farm", description=output_str)
+        )
 
     @commands.command()
     async def plant(self, ctx, *args):
@@ -206,17 +220,21 @@ class Farming(commands.Cog):
 
             for rc in rc_list:
                 if bool(rc.row) and bool(rc.column):
-                    farm_template[rc.row - 1][rc.column - 1] = 1   # Should be function which plants a single plot.
+                    # Should be function which plants a single plot.
+                    farm_template[rc.row - 1][rc.column - 1] = 1
                 elif rc.row:
                     for i in range(len_row):
-                        farm_template[rc.row - 1][i] = 1  # Should be function which plants a single plot.
+                        # Should be function which plants a single plot.
+                        farm_template[rc.row - 1][i] = 1
                 else:
                     for i in range(len_col):
-                        farm_template[i][rc.column - 1] = 1  # Should be function which plants a single plot.
+                        # Should be function which plants a single plot.
+                        farm_template[i][rc.column - 1] = 1
         else:
             for row in farm_template:
                 for i in range(0, len(row)):
-                    row[i] = 1             # Should be function which plants a single plot.
+                    # Should be function which plants a single plot.
+                    row[i] = 1
         output_str = ""
         # Should be function to show entire plot.
         for row in farm_template:
@@ -232,7 +250,9 @@ class Farming(commands.Cog):
                     output_str += str(row[-1])
 
             output_str += "\n"
-        await ctx.send(embed=discord.Embed(title="Current Farm", description=output_str))
+        await ctx.send(
+            embed=discord.Embed(title="Current Farm", description=output_str)
+        )
 
     @staticmethod
     def check_plot_validity(farm: list, plot: PlotCoordinates):
