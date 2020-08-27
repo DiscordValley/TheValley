@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from enum import Enum
 import re
+from typing import List
 
 
 PLOT_NOT_FOUND = discord.Embed(
@@ -82,49 +83,27 @@ class Farming(commands.Cog):
         """
         farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         if plots:
-            rc_list = plots
-            len_col = len(farm_template)
-            len_row = len(farm_template[0])
-
-            for rc in rc_list:
-                if not self.check_plot_validity(farm_template, rc):
+            rc_list = []
+            height = len(farm_template)
+            width = len(farm_template[0])
+            for rc in plots:
+                if self.check_plot_validity(farm_template, rc):
+                    if rc.row and rc.column:
+                        rc_list.append(rc)
+                    elif rc.row:
+                        for i in range(1, width + 1):
+                            rc_list.append(PlotCoordinate(row=rc.row, column=i))
+                    elif rc.column:
+                        for i in range(1, height + 1):
+                            rc_list.append(PlotCoordinate(row=i, column=rc.column))
+                else:
                     await ctx.send(embed=PLOT_NOT_FOUND)
                     return
-            for rc in rc_list:
-                if rc.row and rc.column:
-                    # Should be function which harvests a single plot.
-                    farm_template[rc.row - 1][rc.column - 1] = 1
-                elif rc.row:
-                    for i in range(len_row):
-                        # Should be function which harvests a single plot.
-                        farm_template[rc.row - 1][i] = 1
-                else:
-                    for i in range(len_col):
-                        # Should be function which harvests a single plot.
-                        farm_template[i][rc.column - 1] = 1
+            farm_template = self.work_plots(farm_template, PlotActions.HARVEST, rc_list)
         else:
-            for row in farm_template:
-                for i in range(0, len(row)):
-                    # Should be function which harvests a single plot.
-                    row[i] = 1
-        output_str = ""
-        # Show
-        for row in farm_template:
-            for plot in row[:-1]:
-                if plot == 1:
-                    output_str += str(plot) + "--"
-                else:
-                    output_str += str(plot) + "-"
-            else:
-                if row[-1] == 1:
-                    output_str += str(row[-1])
-                else:
-                    output_str += str(row[-1])
+            farm_template = self.work_plots(farm_template, PlotActions.HARVEST)
 
-            output_str += "\n"
-        await ctx.send(
-            embed=discord.Embed(title="Current Farm", description=output_str)
-        )
+        await self.display_farm(ctx, farm_template)
 
     @commands.command()
     async def water(self, ctx, plots: commands.Greedy[PlotCoordinateConverter]):
@@ -147,49 +126,27 @@ class Farming(commands.Cog):
         """
         farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         if plots:
-            rc_list = plots
-            len_col = len(farm_template)
-            len_row = len(farm_template[0])
-
-            for rc in rc_list:
-                if not self.check_plot_validity(farm_template, rc):
+            rc_list = []
+            height = len(farm_template)
+            width = len(farm_template[0])
+            for rc in plots:
+                if self.check_plot_validity(farm_template, rc):
+                    if rc.row and rc.column:
+                        rc_list.append(rc)
+                    elif rc.row:
+                        for i in range(1, width + 1):
+                            rc_list.append(PlotCoordinate(row=rc.row, column=i))
+                    elif rc.column:
+                        for i in range(1, height + 1):
+                            rc_list.append(PlotCoordinate(row=i, column=rc.column))
+                else:
                     await ctx.send(embed=PLOT_NOT_FOUND)
                     return
-            for rc in rc_list:
-                if rc.row and rc.column:
-                    # Should be function which harvests a single plot.
-                    farm_template[rc.row - 1][rc.column - 1] = 1
-                elif rc.row:
-                    for i in range(len_row):
-                        # Should be function which harvests a single plot.
-                        farm_template[rc.row - 1][i] = 1
-                else:
-                    for i in range(len_col):
-                        # Should be function which harvests a single plot.
-                        farm_template[i][rc.column - 1] = 1
+            farm_template = self.work_plots(farm_template, PlotActions.WATER, rc_list)
         else:
-            for row in farm_template:
-                for i in range(0, len(row)):
-                    # Should be function which harvests a single plot.
-                    row[i] = 1
-        output_str = ""
-        # Show
-        for row in farm_template:
-            for plot in row[:-1]:
-                if plot == 1:
-                    output_str += str(plot) + "--"
-                else:
-                    output_str += str(plot) + "-"
-            else:
-                if row[-1] == 1:
-                    output_str += str(row[-1])
-                else:
-                    output_str += str(row[-1])
+            farm_template = self.work_plots(farm_template, PlotActions.WATER)
 
-            output_str += "\n"
-        await ctx.send(
-            embed=discord.Embed(title="Current Farm", description=output_str)
-        )
+        await self.display_farm(ctx, farm_template)
 
     @commands.command()
     async def plant(self, ctx, plots: commands.Greedy[PlotCoordinateConverter]):
@@ -212,34 +169,46 @@ class Farming(commands.Cog):
         """
         farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         if plots:
-            rc_list = plots
-            len_col = len(farm_template)
-            len_row = len(farm_template[0])
-
-            for rc in rc_list:
-                if not self.check_plot_validity(farm_template, rc):
+            rc_list = []
+            height = len(farm_template)
+            width = len(farm_template[0])
+            for rc in plots:
+                if self.check_plot_validity(farm_template, rc):
+                    if rc.row and rc.column:
+                        rc_list.append(rc)
+                    elif rc.row:
+                        for i in range(1, width + 1):
+                            rc_list.append(PlotCoordinate(row=rc.row, column=i))
+                    elif rc.column:
+                        for i in range(1, height + 1):
+                            rc_list.append(PlotCoordinate(row=i, column=rc.column))
+                else:
                     await ctx.send(embed=PLOT_NOT_FOUND)
                     return
-            for rc in rc_list:
-                if rc.row and rc.column:
-                    # Should be function which harvests a single plot.
-                    farm_template[rc.row - 1][rc.column - 1] = 1
-                elif rc.row:
-                    for i in range(len_row):
-                        # Should be function which harvests a single plot.
-                        farm_template[rc.row - 1][i] = 1
-                else:
-                    for i in range(len_col):
-                        # Should be function which harvests a single plot.
-                        farm_template[i][rc.column - 1] = 1
+            farm_template = self.work_plots(farm_template, PlotActions.PLANT, rc_list)
         else:
-            for row in farm_template:
-                for i in range(0, len(row)):
-                    # Should be function which harvests a single plot.
-                    row[i] = 1
+            farm_template = self.work_plots(farm_template, PlotActions.PLANT)
+
+        await self.display_farm(ctx, farm_template)
+
+    @staticmethod
+    def check_plot_validity(farm: list, plot):
+        len_col = len(farm)
+        len_row = len(farm[0])
+
+        if not plot.row and not plot.column:
+            return False
+        if plot.row:
+            if plot.row > len_col:
+                return False
+        if plot.column:
+            if plot.column > len_row:
+                return False
+        return True
+
+    async def display_farm(self, ctx, farm):
         output_str = ""
-        # Show
-        for row in farm_template:
+        for row in farm:
             for plot in row[:-1]:
                 if plot == 1:
                     output_str += str(plot) + "--"
@@ -257,19 +226,32 @@ class Farming(commands.Cog):
         )
 
     @staticmethod
-    def check_plot_validity(farm: list, plot):
-        len_col = len(farm)
-        len_row = len(farm[0])
-
-        if not plot.row and not plot.column:
-            return False
-        if plot.row:
-            if plot.row > len_col:
-                return False
-        if plot.column:
-            if plot.column > len_row:
-                return False
-        return True
+    def work_plots(farm: list, action: PlotActions, plots: List[PlotCoordinate] = None):
+        if action is PlotActions.HARVEST:
+            if plots:
+                for plot in plots:
+                    farm[plot.row - 1][plot.column - 1] = 1
+            else:
+                for row in farm:
+                    for i in range(0, len(row)):
+                        row[i] = 1
+        elif action is PlotActions.WATER:
+            if plots:
+                for plot in plots:
+                    farm[plot.row - 1][plot.column - 1] = 1
+            else:
+                for row in farm:
+                    for i in range(0, len(row)):
+                        row[i] = 1
+        elif action is PlotActions.PLANT:
+            if plots:
+                for plot in plots:
+                    farm[plot.row - 1][plot.column - 1] = 1
+            else:
+                for row in farm:
+                    for i in range(0, len(row)):
+                        row[i] = 1
+        return farm
 
 
 def setup(bot):
