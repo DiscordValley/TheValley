@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
-
-
+from enum import Enum
 import re
 
 
@@ -10,8 +9,23 @@ PLOT_NOT_FOUND = discord.Embed(
 )
 
 
-class PlotCoordinates:
-    def __init__(self, argument=None):
+class PlotActions(Enum):
+    HARVEST = 1
+    WATER = 2
+    PLANT = 3
+
+
+class PlotCoordinate:
+    def __init__(self, row, column):
+        self.row = row
+        self.column = column
+
+    def __repr__(self):
+        return f"<{self.row} {self.column}>"
+
+
+class PlotCoordinateConverter(commands.Converter):
+    async def convert(self, ctx, argument: str):
         match1 = re.match(r"([0-9]+)([A-Za-z]+)", argument, re.I)
         match2 = re.match(r"([A-Za-z]+)([0-9]+)", argument, re.I)
         if match1:
@@ -34,11 +48,9 @@ class PlotCoordinates:
                 row = int(rc_list)
                 column = None
             else:
-                row = None
-                column = None
-
-        self.row = row
-        self.column = ord(column.lower()) - 96 if column else None
+                raise ValueError
+        column = ord(column.lower()) - ord("a") + 1 if column else None
+        return PlotCoordinate(row, column)
 
 
 class Farming(commands.Cog):
@@ -50,7 +62,7 @@ class Farming(commands.Cog):
         print(f"{type(self).__name__} Cog ready.")
 
     @commands.command()
-    async def harvest(self, ctx, *args):
+    async def harvest(self, ctx, plots: commands.Greedy[PlotCoordinateConverter]):
         """
         *Harvest your crops.*
         Usage:
@@ -69,19 +81,17 @@ class Farming(commands.Cog):
         If <plots> is not specified, all plots will be harvested.
         """
         farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-        if args:
-            rc_list = []
+        if plots:
+            rc_list = plots
             len_col = len(farm_template)
             len_row = len(farm_template[0])
-            for arg in args:
-                rc_list.append(PlotCoordinates(argument=arg))
-                # Check to see if each row-column pair is valid. Give Error if not.
-                for rc in rc_list:
-                    if not self.check_plot_validity(farm_template, rc):
-                        await ctx.send(embed=PLOT_NOT_FOUND)
-                        return
+
             for rc in rc_list:
-                if bool(rc.row) and bool(rc.column):
+                if not self.check_plot_validity(farm_template, rc):
+                    await ctx.send(embed=PLOT_NOT_FOUND)
+                    return
+            for rc in rc_list:
+                if rc.row and rc.column:
                     # Should be function which harvests a single plot.
                     farm_template[rc.row - 1][rc.column - 1] = 1
                 elif rc.row:
@@ -117,7 +127,7 @@ class Farming(commands.Cog):
         )
 
     @commands.command()
-    async def water(self, ctx, *args):
+    async def water(self, ctx, plots: commands.Greedy[PlotCoordinateConverter]):
         """
         *Water your crops.*
         Usage:
@@ -136,37 +146,34 @@ class Farming(commands.Cog):
         If <plots> is not specified, all plots will be watered.
         """
         farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-        if args:
-            rc_list = []
+        if plots:
+            rc_list = plots
             len_col = len(farm_template)
             len_row = len(farm_template[0])
-            for arg in args:
-                rc_list.append(PlotCoordinates(argument=arg))
-                # Check to see if each row-column pair is valid. Give Error if not.
-                for rc in rc_list:
-                    if not self.check_plot_validity(farm_template, rc):
-                        await ctx.send(embed=PLOT_NOT_FOUND)
-                        return
 
             for rc in rc_list:
-                if bool(rc.row) and bool(rc.column):
-                    # Should be function which waters a single plot.
+                if not self.check_plot_validity(farm_template, rc):
+                    await ctx.send(embed=PLOT_NOT_FOUND)
+                    return
+            for rc in rc_list:
+                if rc.row and rc.column:
+                    # Should be function which harvests a single plot.
                     farm_template[rc.row - 1][rc.column - 1] = 1
                 elif rc.row:
                     for i in range(len_row):
-                        # Should be function which waters a single plot.
+                        # Should be function which harvests a single plot.
                         farm_template[rc.row - 1][i] = 1
                 else:
                     for i in range(len_col):
-                        # Should be function which waters a single plot.
+                        # Should be function which harvests a single plot.
                         farm_template[i][rc.column - 1] = 1
         else:
             for row in farm_template:
                 for i in range(0, len(row)):
-                    # Should be function which waters a single plot.
+                    # Should be function which harvests a single plot.
                     row[i] = 1
         output_str = ""
-        # Should be function to show entire plot.
+        # Show
         for row in farm_template:
             for plot in row[:-1]:
                 if plot == 1:
@@ -185,7 +192,7 @@ class Farming(commands.Cog):
         )
 
     @commands.command()
-    async def plant(self, ctx, *args):
+    async def plant(self, ctx, plots: commands.Greedy[PlotCoordinateConverter]):
         """
         *Plant your crops.*
         Usage:
@@ -204,37 +211,34 @@ class Farming(commands.Cog):
         If <plots> is not specified, all plots will be planted.
         """
         farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-        if args:
-            rc_list = []
+        if plots:
+            rc_list = plots
             len_col = len(farm_template)
             len_row = len(farm_template[0])
-            for arg in args:
-                rc_list.append(PlotCoordinates(argument=arg))
-                # Check to see if each row-column pair is valid. Give Error if not.
-                for rc in rc_list:
-                    if not self.check_plot_validity(farm_template, rc):
-                        await ctx.send(embed=PLOT_NOT_FOUND)
-                        return
 
             for rc in rc_list:
-                if bool(rc.row) and bool(rc.column):
-                    # Should be function which plants a single plot.
+                if not self.check_plot_validity(farm_template, rc):
+                    await ctx.send(embed=PLOT_NOT_FOUND)
+                    return
+            for rc in rc_list:
+                if rc.row and rc.column:
+                    # Should be function which harvests a single plot.
                     farm_template[rc.row - 1][rc.column - 1] = 1
                 elif rc.row:
                     for i in range(len_row):
-                        # Should be function which plants a single plot.
+                        # Should be function which harvests a single plot.
                         farm_template[rc.row - 1][i] = 1
                 else:
                     for i in range(len_col):
-                        # Should be function which plants a single plot.
+                        # Should be function which harvests a single plot.
                         farm_template[i][rc.column - 1] = 1
         else:
             for row in farm_template:
                 for i in range(0, len(row)):
-                    # Should be function which plants a single plot.
+                    # Should be function which harvests a single plot.
                     row[i] = 1
         output_str = ""
-        # Should be function to show entire plot.
+        # Show
         for row in farm_template:
             for plot in row[:-1]:
                 if plot == 1:
@@ -253,7 +257,7 @@ class Farming(commands.Cog):
         )
 
     @staticmethod
-    def check_plot_validity(farm: list, plot: PlotCoordinates):
+    def check_plot_validity(farm: list, plot):
         len_col = len(farm)
         len_row = len(farm[0])
 
