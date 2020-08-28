@@ -26,27 +26,27 @@ class PlotCoordinate:
 
 
 class PlotCoordinateConverter(commands.Converter):
-    async def convert(self, ctx, argument: str):
-        match1 = re.match(r"([0-9]+)([A-Za-z]+)", argument, re.I)
-        match2 = re.match(r"([A-Za-z]+)([0-9]+)", argument, re.I)
+    async def convert(self, ctx, in_coordinate: str):
+        match1 = re.match(r"([0-9]+)([A-Za-z]+)", in_coordinate, re.I)
+        match2 = re.match(r"([A-Za-z]+)([0-9]+)", in_coordinate, re.I)
         if match1:
-            rc_list = match1.groups()
-            row = int(rc_list[0])
-            column = rc_list[1]
+            out_coordinate = match1.groups()
+            row = int(out_coordinate[0])
+            column = out_coordinate[1]
         elif match2:
-            rc_list = match2.groups()
-            column = rc_list[0]
-            row = int(rc_list[1])
+            out_coordinate = match2.groups()
+            column = out_coordinate[0]
+            row = int(out_coordinate[1])
         else:
-            match1 = re.match(r"[A-Za-z]+", argument, re.I)
-            match2 = re.match(r"\d+", argument, re.I)
+            match1 = re.match(r"[A-Za-z]+", in_coordinate, re.I)
+            match2 = re.match(r"\d+", in_coordinate, re.I)
             if match1:
-                rc_list = match1.group()
-                column = rc_list[0]
+                out_coordinate = match1.group()
+                column = out_coordinate[0]
                 row = None
             elif match2:
-                rc_list = match2.group()
-                row = int(rc_list)
+                out_coordinate = match2.group()
+                row = int(out_coordinate)
                 column = None
             else:
                 raise ValueError
@@ -63,7 +63,13 @@ class Farming(commands.Cog):
         print(f"{type(self).__name__} Cog ready.")
 
     @commands.command()
-    async def harvest(self, ctx, plots: commands.Greedy[PlotCoordinateConverter]):
+    async def harvest(
+        self,
+        ctx,
+        input_coordinates: commands.Greedy[PlotCoordinateConverter],
+        *,
+        catcher: str = None,
+    ):
         """
         *Harvest your crops.*
         Usage:
@@ -82,31 +88,46 @@ class Farming(commands.Cog):
         If <plots> is not specified, all plots will be harvested.
         """
         farm = self.get_farm()
-        if plots:
-            rc_list = []
-            height = len(farm)
-            width = len(farm[0])
-            for rc in plots:
-                if self.check_plot_validity(farm, rc):
-                    if rc.row and rc.column:
-                        rc_list.append(rc)
-                    elif rc.row:
-                        for i in range(1, width + 1):
-                            rc_list.append(PlotCoordinate(row=rc.row, column=i))
-                    elif rc.column:
-                        for i in range(1, height + 1):
-                            rc_list.append(PlotCoordinate(row=i, column=rc.column))
-                else:
-                    await ctx.send(embed=PLOT_NOT_FOUND)
-                    return
-            farm = self.work_plots(farm, PlotActions.HARVEST, rc_list)
-        else:
-            farm = self.work_plots(farm, PlotActions.HARVEST)
 
-        await self.display_farm(ctx, farm)
+        if catcher:
+            await ctx.send(embed=PLOT_NOT_FOUND)
+            return
+        else:
+            if input_coordinates:
+                coordinates = []
+                height = len(farm)
+                width = len(farm[0])
+                for coordinate in input_coordinates:
+                    if self.check_plot_validity(farm, coordinate):
+                        if coordinate.row and coordinate.column:
+                            coordinates.append(coordinate)
+                        elif coordinate.row:
+                            for i in range(1, width + 1):
+                                coordinates.append(
+                                    PlotCoordinate(row=coordinate.row, column=i)
+                                )
+                        elif coordinate.column:
+                            for i in range(1, height + 1):
+                                coordinates.append(
+                                    PlotCoordinate(row=i, column=coordinate.column)
+                                )
+                    else:
+                        await ctx.send(embed=PLOT_NOT_FOUND)
+                        return
+                farm = self.work_plots(farm, PlotActions.HARVEST, coordinates)
+            else:
+                farm = self.work_plots(farm, PlotActions.HARVEST)
+
+            await self.display_farm(ctx, farm)
 
     @commands.command()
-    async def water(self, ctx, plots: commands.Greedy[PlotCoordinateConverter]):
+    async def water(
+        self,
+        ctx,
+        input_coordinates: commands.Greedy[PlotCoordinateConverter],
+        *,
+        catcher: str = None,
+    ):
         """
         *Water your crops.*
         Usage:
@@ -125,31 +146,46 @@ class Farming(commands.Cog):
         If <plots> is not specified, all plots will be watered.
         """
         farm = self.get_farm()
-        if plots:
-            rc_list = []
-            height = len(farm)
-            width = len(farm[0])
-            for rc in plots:
-                if self.check_plot_validity(farm, rc):
-                    if rc.row and rc.column:
-                        rc_list.append(rc)
-                    elif rc.row:
-                        for i in range(1, width + 1):
-                            rc_list.append(PlotCoordinate(row=rc.row, column=i))
-                    elif rc.column:
-                        for i in range(1, height + 1):
-                            rc_list.append(PlotCoordinate(row=i, column=rc.column))
-                else:
-                    await ctx.send(embed=PLOT_NOT_FOUND)
-                    return
-            farm = self.work_plots(farm, PlotActions.WATER, rc_list)
-        else:
-            farm = self.work_plots(farm, PlotActions.WATER)
 
-        await self.display_farm(ctx, farm)
+        if catcher:
+            await ctx.send(embed=PLOT_NOT_FOUND)
+            return
+        else:
+            if input_coordinates:
+                coordinates = []
+                height = len(farm)
+                width = len(farm[0])
+                for coordinate in input_coordinates:
+                    if self.check_plot_validity(farm, coordinate):
+                        if coordinate.row and coordinate.column:
+                            coordinates.append(coordinate)
+                        elif coordinate.row:
+                            for i in range(1, width + 1):
+                                coordinates.append(
+                                    PlotCoordinate(row=coordinate.row, column=i)
+                                )
+                        elif coordinate.column:
+                            for i in range(1, height + 1):
+                                coordinates.append(
+                                    PlotCoordinate(row=i, column=coordinate.column)
+                                )
+                    else:
+                        await ctx.send(embed=PLOT_NOT_FOUND)
+                        return
+                farm = self.work_plots(farm, PlotActions.WATER, coordinates)
+            else:
+                farm = self.work_plots(farm, PlotActions.WATER)
+
+            await self.display_farm(ctx, farm)
 
     @commands.command()
-    async def plant(self, ctx, plots: commands.Greedy[PlotCoordinateConverter]):
+    async def plant(
+        self,
+        ctx,
+        input_coordinates: commands.Greedy[PlotCoordinateConverter],
+        *,
+        catcher: str = None,
+    ):
         """
         *Plant your crops.*
         Usage:
@@ -168,43 +204,55 @@ class Farming(commands.Cog):
         If <plots> is not specified, all plots will be planted.
         """
         farm = self.get_farm()
-        if plots:
-            rc_list = []
-            height = len(farm)
-            width = len(farm[0])
-            for rc in plots:
-                if self.check_plot_validity(farm, rc):
-                    if rc.row and rc.column:
-                        rc_list.append(rc)
-                    elif rc.row:
-                        for i in range(1, width + 1):
-                            rc_list.append(PlotCoordinate(row=rc.row, column=i))
-                    elif rc.column:
-                        for i in range(1, height + 1):
-                            rc_list.append(PlotCoordinate(row=i, column=rc.column))
-                else:
-                    await ctx.send(embed=PLOT_NOT_FOUND)
-                    return
-            farm = self.work_plots(farm, PlotActions.PLANT, rc_list)
-        else:
-            farm = self.work_plots(farm, PlotActions.PLANT)
 
-        await self.display_farm(ctx, farm)
+        if catcher:
+            await ctx.send(embed=PLOT_NOT_FOUND)
+            return
+        else:
+            if input_coordinates:
+                coordinates = []
+                height = len(farm)
+                width = len(farm[0])
+                for coordinate in input_coordinates:
+                    if self.check_plot_validity(farm, coordinate):
+                        if coordinate.row and coordinate.column:
+                            coordinates.append(coordinate)
+                        elif coordinate.row:
+                            for i in range(1, width + 1):
+                                coordinates.append(
+                                    PlotCoordinate(row=coordinate.row, column=i)
+                                )
+                        elif coordinate.column:
+                            for i in range(1, height + 1):
+                                coordinates.append(
+                                    PlotCoordinate(row=i, column=coordinate.column)
+                                )
+                    else:
+                        await ctx.send(embed=PLOT_NOT_FOUND)
+                        return
+                farm = self.work_plots(farm, PlotActions.PLANT, coordinates)
+            else:
+                farm = self.work_plots(farm, PlotActions.PLANT)
+
+            await self.display_farm(ctx, farm)
 
     @staticmethod
     def check_plot_validity(farm: list, plot):
         len_col = len(farm)
         len_row = len(farm[0])
-
         if not plot.row and not plot.column:
             return False
-        if plot.row:
-            if plot.row > len_col:
+        if bool(plot.row):
+            if plot.row <= len_col:
+                return True
+            else:
                 return False
-        if plot.column:
-            if plot.column > len_row:
+        if bool(plot.column):
+            if plot.column <= len_row:
+                return True
+            else:
                 return False
-        return True
+        return False
 
     @staticmethod
     async def display_farm(ctx, farm):
