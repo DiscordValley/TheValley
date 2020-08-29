@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 @dataclass
-class Plant:
+class Crop:
     id: int
     farm_id: int
     crop_id: int

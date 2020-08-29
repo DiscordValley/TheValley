@@ -2,8 +2,8 @@ from bot.database import db
 from datetime import datetime
 
 
-class Plant(db.Model):
-    __tablename__ = "plants"
+class PlantedCrop(db.Model):
+    __tablename__ = "planted_crops"
 
     id = db.Column(db.BIGINT, primary_key=True)
     farm_id = db.Column(db.ForeignKey("farms.id"))
