@@ -7,7 +7,6 @@ class Player(db.Model):
     id = db.Column(db.BIGINT, primary_key=True)
     user_id = db.Column(db.BIGINT)
     guild_id = db.Column(db.BIGINT)
-    farm_id = db.Column(db.ForeignKey("farms.id"))
     balance = db.Column(db.Integer)
     user_xp = db.Column(db.Integer)
     user_level = db.Column(db.Integer)
