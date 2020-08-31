@@ -89,38 +89,13 @@ class Farming(commands.Cog):
         *,
         catcher: str = None,
     ):
-        farm = self.get_farm()
-
-        if catcher:
-            await ctx.send(embed=PLOT_NOT_FOUND)
-            return
-        else:
-            if input_coordinates:
-                coordinates = []
-                height = len(farm)
-                width = len(farm[0])
-                for coordinate in input_coordinates:
-                    if self.check_plot_validity(farm, coordinate):
-                        if coordinate.row and coordinate.column:
-                            coordinates.append(coordinate)
-                        elif coordinate.row:
-                            for i in range(1, width + 1):
-                                coordinates.append(
-                                    PlotCoordinate(row=coordinate.row, column=i)
-                                )
-                        elif coordinate.column:
-                            for i in range(1, height + 1):
-                                coordinates.append(
-                                    PlotCoordinate(row=i, column=coordinate.column)
-                                )
-                    else:
-                        await ctx.send(embed=PLOT_NOT_FOUND)
-                        return
-                farm = self.work_plots(farm, PlotActions.HARVEST, coordinates)
-            else:
-                farm = self.work_plots(farm, PlotActions.HARVEST)
-
-            await self.display_farm(ctx, farm)
+        valid = True if catcher is None else False
+        await self.action(
+            ctx,
+            input_coordinates,
+            action=PlotActions.HARVEST,
+            valid=valid,
+        )
 
     @commands.command(
         brief="*Water your crops*", help=INSTRUCTIONS.replace("[action]", "water")
@@ -132,38 +107,13 @@ class Farming(commands.Cog):
         *,
         catcher: str = None,
     ):
-        farm = self.get_farm()
-
-        if catcher:
-            await ctx.send(embed=PLOT_NOT_FOUND)
-            return
-        else:
-            if input_coordinates:
-                coordinates = []
-                height = len(farm)
-                width = len(farm[0])
-                for coordinate in input_coordinates:
-                    if self.check_plot_validity(farm, coordinate):
-                        if coordinate.row and coordinate.column:
-                            coordinates.append(coordinate)
-                        elif coordinate.row:
-                            for i in range(1, width + 1):
-                                coordinates.append(
-                                    PlotCoordinate(row=coordinate.row, column=i)
-                                )
-                        elif coordinate.column:
-                            for i in range(1, height + 1):
-                                coordinates.append(
-                                    PlotCoordinate(row=i, column=coordinate.column)
-                                )
-                    else:
-                        await ctx.send(embed=PLOT_NOT_FOUND)
-                        return
-                farm = self.work_plots(farm, PlotActions.WATER, coordinates)
-            else:
-                farm = self.work_plots(farm, PlotActions.WATER)
-
-            await self.display_farm(ctx, farm)
+        valid = True if catcher is None else False
+        await self.action(
+            ctx,
+            input_coordinates,
+            action=PlotActions.WATER,
+            valid=valid,
+        )
 
     @commands.command(
         brief="*Plant your crops*", help=INSTRUCTIONS.replace("[action]", "plant")
@@ -175,38 +125,52 @@ class Farming(commands.Cog):
         *,
         catcher: str = None,
     ):
+        valid = True if catcher is None else False
+        await self.action(
+            ctx,
+            input_coordinates,
+            action=PlotActions.PLANT,
+            valid=valid,
+        )
+
+    async def action(
+        self,
+        ctx,
+        input_coordinates: List[PlotCoordinate],
+        action: PlotActions,
+        valid: bool = True,
+    ):
         farm = self.get_farm()
 
-        if catcher:
-            await ctx.send(embed=PLOT_NOT_FOUND)
-            return
-        else:
-            if input_coordinates:
-                coordinates = []
-                height = len(farm)
-                width = len(farm[0])
-                for coordinate in input_coordinates:
-                    if self.check_plot_validity(farm, coordinate):
-                        if coordinate.row and coordinate.column:
-                            coordinates.append(coordinate)
-                        elif coordinate.row:
-                            for i in range(1, width + 1):
-                                coordinates.append(
-                                    PlotCoordinate(row=coordinate.row, column=i)
-                                )
-                        elif coordinate.column:
-                            for i in range(1, height + 1):
-                                coordinates.append(
-                                    PlotCoordinate(row=i, column=coordinate.column)
-                                )
-                    else:
-                        await ctx.send(embed=PLOT_NOT_FOUND)
-                        return
-                farm = self.work_plots(farm, PlotActions.PLANT, coordinates)
-            else:
-                farm = self.work_plots(farm, PlotActions.PLANT)
+        if not valid:
+            return await ctx.send(embed=PLOT_NOT_FOUND)
 
-            await self.display_farm(ctx, farm)
+        if input_coordinates:
+            coordinates = list()
+            height = len(farm)
+            width = len(farm[0])
+            for coordinate in input_coordinates:
+                if self.check_plot_validity(farm, coordinate):
+                    if coordinate.row and coordinate.column:
+                        coordinates.append(coordinate)
+                    elif coordinate.row:
+                        for i in range(1, width + 1):
+                            coordinates.append(
+                                PlotCoordinate(row=coordinate.row, column=i)
+                            )
+                    elif coordinate.column:
+                        for i in range(1, height + 1):
+                            coordinates.append(
+                                PlotCoordinate(row=i, column=coordinate.column)
+                            )
+                else:
+                    await ctx.send(embed=PLOT_NOT_FOUND)
+                    return
+            farm = self.work_plots(farm, PlotActions.HARVEST, coordinates)
+        else:
+            farm = self.work_plots(farm, PlotActions.HARVEST)
+
+        await self.display_farm(ctx, farm)
 
     @staticmethod
     def check_plot_validity(farm: list, plot):
