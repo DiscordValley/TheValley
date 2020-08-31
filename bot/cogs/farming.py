@@ -9,6 +9,23 @@ PLOT_NOT_FOUND = discord.Embed(
     description="The plot specified was not recognized. Please try again."
 )
 
+INSTRUCTIONS = """
+        Usage:
+            {prefix}[action] <plots>
+        <plots> is optional, and can also be multiple arguments.
+        Rows are enumerated starting at '1'.
+        Columns are labeled starting at 'a'.
+        Example with 0's instead of plots:
+           a   b   c
+        1  0   0   0
+        2  0   0   0
+        3  0   0   0
+        <plots> can be a row, column or a specific plot.
+        Specific plot is specified by row number followed by column label.
+        (for example a1 for the top left plot.)
+        If <plots> is not specified, all plots will be [action]ed.
+        """
+
 
 class PlotActions(Enum):
     HARVEST = 1
@@ -62,7 +79,9 @@ class Farming(commands.Cog):
     async def on_ready(self):
         print(f"{type(self).__name__} Cog ready.")
 
-    @commands.command()
+    @commands.command(
+        brief="*Harvest your crops*", help=INSTRUCTIONS.replace("[action]", "harvest")
+    )
     async def harvest(
         self,
         ctx,
@@ -70,23 +89,6 @@ class Farming(commands.Cog):
         *,
         catcher: str = None,
     ):
-        """
-        *Harvest your crops.*
-        Usage:
-            {prefix}harvest <plots>
-        <plots> is optional, and can also be multiple arguments.
-        Rows are enumerated starting at '1'.
-        Columns are labeled starting at 'a'.
-        Example with 0's instead of plots:
-           a   b   c
-        1  0   0   0
-        2  0   0   0
-        3  0   0   0
-        <plots> can be a row, column or a specific plot.
-        Specific plot is specified by row number followed by column label.
-        (for example a1 for the top left plot.)
-        If <plots> is not specified, all plots will be harvested.
-        """
         farm = self.get_farm()
 
         if catcher:
@@ -120,7 +122,9 @@ class Farming(commands.Cog):
 
             await self.display_farm(ctx, farm)
 
-    @commands.command()
+    @commands.command(
+        brief="*Water your crops*", help=INSTRUCTIONS.replace("[action]", "water")
+    )
     async def water(
         self,
         ctx,
@@ -128,23 +132,6 @@ class Farming(commands.Cog):
         *,
         catcher: str = None,
     ):
-        """
-        *Water your crops.*
-        Usage:
-            {prefix}water <plots>
-        <plots> is optional, and can also be multiple arguments.
-        Rows are enumerated starting at '1'.
-        Columns are labeled starting at 'a'.
-        Example with 0's instead of plots:
-           a   b   c
-        1  0   0   0
-        2  0   0   0
-        3  0   0   0
-        <plots> can be a row, column or a specific plot.
-        Specific plot is specified by row number followed by column label.
-        (for example a1 for the top left plot.)
-        If <plots> is not specified, all plots will be watered.
-        """
         farm = self.get_farm()
 
         if catcher:
@@ -178,7 +165,9 @@ class Farming(commands.Cog):
 
             await self.display_farm(ctx, farm)
 
-    @commands.command()
+    @commands.command(
+        brief="*Plant your crops*", help=INSTRUCTIONS.replace("[action]", "plant")
+    )
     async def plant(
         self,
         ctx,
@@ -186,23 +175,6 @@ class Farming(commands.Cog):
         *,
         catcher: str = None,
     ):
-        """
-        *Plant your crops.*
-        Usage:
-            {prefix}plant <plots>
-        <plots> is optional, and can also be multiple arguments.
-        Rows are enumerated starting at '1'.
-        Columns are labeled starting at 'a'.
-        Example with 0's instead of plots:
-           a   b   c
-        1  0   0   0
-        2  0   0   0
-        3  0   0   0
-        <plots> can be a row, column or a specific plot.
-        Specific plot is specified by row number followed by column label.
-        (for example a1 for the top left plot.)
-        If <plots> is not specified, all plots will be planted.
-        """
         farm = self.get_farm()
 
         if catcher:
