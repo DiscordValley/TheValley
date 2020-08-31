@@ -27,25 +27,25 @@ class PlotCoordinate:
 
 class PlotCoordinateConverter(commands.Converter):
     async def convert(self, ctx, in_coordinate: str):
-        match1 = re.match(r"([0-9]+)([A-Za-z]+)", in_coordinate, re.I)
-        match2 = re.match(r"([A-Za-z]+)([0-9]+)", in_coordinate, re.I)
-        if match1:
-            out_coordinate = match1.groups()
+        match_1a = re.match(r"([0-9]+)([A-Za-z]+)", in_coordinate, re.I)
+        match_a1 = re.match(r"([A-Za-z]+)([0-9]+)", in_coordinate, re.I)
+        if match_1a:
+            out_coordinate = match_1a.groups()
             row = int(out_coordinate[0])
             column = out_coordinate[1]
-        elif match2:
-            out_coordinate = match2.groups()
+        elif match_a1:
+            out_coordinate = match_a1.groups()
             column = out_coordinate[0]
             row = int(out_coordinate[1])
         else:
-            match1 = re.match(r"[A-Za-z]+", in_coordinate, re.I)
-            match2 = re.match(r"\d+", in_coordinate, re.I)
-            if match1:
-                out_coordinate = match1.group()
+            match_a = re.match(r"[A-Za-z]+", in_coordinate, re.I)
+            match_1 = re.match(r"\d+", in_coordinate, re.I)
+            if match_a:
+                out_coordinate = match_a.group()
                 column = out_coordinate[0]
                 row = None
-            elif match2:
-                out_coordinate = match2.group()
+            elif match_1:
+                out_coordinate = match_1.group()
                 row = int(out_coordinate)
                 column = None
             else:
