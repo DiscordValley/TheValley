@@ -1,8 +1,10 @@
 import discord
 from discord.ext import commands
-from enum import Enum
 import re
 from typing import List
+
+from bot.game import Farm, Player
+from bot.utils.constants import PlotCoordinate, PlotActions
 
 
 PLOT_NOT_FOUND = discord.Embed(
@@ -25,21 +27,6 @@ INSTRUCTIONS = """
         (for example a1 for the top left plot.)
         If <plots> is not specified, all plots will be [action]ed.
         """
-
-
-class PlotActions(Enum):
-    HARVEST = 1
-    WATER = 2
-    PLANT = 3
-
-
-class PlotCoordinate:
-    def __init__(self, row, column):
-        self.row = row
-        self.column = column
-
-    def __repr__(self):
-        return f"<{self.row} {self.column}>"
 
 
 class PlotCoordinateConverter(commands.Converter):
@@ -133,6 +120,7 @@ class Farming(commands.Cog):
             valid=valid,
         )
 
+    @staticmethod
     async def action(
         self,
         ctx,
@@ -140,108 +128,22 @@ class Farming(commands.Cog):
         action: PlotActions,
         valid: bool = True,
     ):
-        farm = self.get_farm()
-
         if not valid:
             return await ctx.send(embed=PLOT_NOT_FOUND)
 
+        player = await Player.load(user_id=ctx.author.id, guild_id=ctx.guild.id)
+        farm = await Farm.load(player_id=player.id)
+
         if input_coordinates:
-            coordinates = list()
-            height = len(farm)
-            width = len(farm[0])
             for coordinate in input_coordinates:
-                if self.check_plot_validity(farm, coordinate):
-                    if coordinate.row and coordinate.column:
-                        coordinates.append(coordinate)
-                    elif coordinate.row:
-                        for i in range(1, width + 1):
-                            coordinates.append(
-                                PlotCoordinate(row=coordinate.row, column=i)
-                            )
-                    elif coordinate.column:
-                        for i in range(1, height + 1):
-                            coordinates.append(
-                                PlotCoordinate(row=i, column=coordinate.column)
-                            )
-                else:
-                    await ctx.send(embed=PLOT_NOT_FOUND)
-                    return
-            farm = self.work_plots(farm, PlotActions.HARVEST, coordinates)
-        else:
-            farm = self.work_plots(farm, PlotActions.HARVEST)
+                if not farm.validate_coordinate(
+                    row=coordinate.row, column=coordinate.column
+                ):
+                    return await ctx.send(embed=PLOT_NOT_FOUND)
 
-        await self.display_farm(ctx, farm)
+        await farm.work_plots(action=action, coordinates=input_coordinates)
 
-    @staticmethod
-    def check_plot_validity(farm: list, plot):
-        len_col = len(farm)
-        len_row = len(farm[0])
-        if not plot.row and not plot.column:
-            return False
-        if bool(plot.row):
-            if plot.row <= len_col:
-                return True
-            else:
-                return False
-        if bool(plot.column):
-            if plot.column <= len_row:
-                return True
-            else:
-                return False
-        return False
-
-    @staticmethod
-    async def display_farm(ctx, farm):
-        output_str = ""
-        for row in farm:
-            for plot in row[:-1]:
-                if plot == 1:
-                    output_str += str(plot) + "--"
-                else:
-                    output_str += str(plot) + "-"
-            else:
-                if row[-1] == 1:
-                    output_str += str(row[-1])
-                else:
-                    output_str += str(row[-1])
-
-            output_str += "\n"
-        await ctx.send(
-            embed=discord.Embed(title="Current Farm", description=output_str)
-        )
-
-    @staticmethod
-    def get_farm():
-        farm_template = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-        return farm_template
-
-    @staticmethod
-    def work_plots(farm: list, action: PlotActions, plots: List[PlotCoordinate] = None):
-        if action is PlotActions.HARVEST:
-            if plots:
-                for plot in plots:
-                    farm[plot.row - 1][plot.column - 1] = 1
-            else:
-                for row in farm:
-                    for i in range(0, len(row)):
-                        row[i] = 1
-        elif action is PlotActions.WATER:
-            if plots:
-                for plot in plots:
-                    farm[plot.row - 1][plot.column - 1] = 1
-            else:
-                for row in farm:
-                    for i in range(0, len(row)):
-                        row[i] = 1
-        elif action is PlotActions.PLANT:
-            if plots:
-                for plot in plots:
-                    farm[plot.row - 1][plot.column - 1] = 1
-            else:
-                for row in farm:
-                    for i in range(0, len(row)):
-                        row[i] = 1
-        return farm
+        await ctx.send(farm.display())
 
 
 def setup(bot):

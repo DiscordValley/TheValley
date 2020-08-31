@@ -14,6 +14,18 @@ class PlotSize:
     columns: int
 
 
+@dataclass
+class PlotCoordinate:
+    row: int
+    column: int
+
+
+class PlotActions(Enum):
+    HARVEST = 1
+    WATER = 2
+    PLANT = 3
+
+
 FARM_SIZE = {
     FarmSizes.SMALL: PlotSize(rows=3, columns=3),
     FarmSizes.MEDIUM: PlotSize(rows=5, columns=7),
