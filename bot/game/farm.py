@@ -10,7 +10,7 @@ class Farm:
         self.id = farm_id
         self.name = name
         self.size = size
-        self.plot = self.initialize_plot()
+        self.plot: List[List] = self.initialize_plot()
 
     @classmethod
     async def load(cls, player_id: int) -> "Farm":
@@ -58,46 +58,36 @@ class Farm:
             raise ValueError("Crop placement out of bounds")
         self.plot[row][column] = crop
 
+    async def work_plot(self, action: PlotActions, row: int, column: int):
+        if not self.validate_coordinate(row, column):
+            return
+        if self.plot[row][column] is not None:
+            self.plot[row][column].work(action)
+        else:
+            if action is PlotActions.PLANT:
+                self.plot[row][column] = await Crop.new(
+                    farm_id=self.id, crop_id=1
+                )  # TODO: Plant kinda needs some crop_id passed doesn't it?
+
     async def work_plots(self, action: PlotActions, coordinates: List[PlotCoordinate]):
-        # if action is PlotActions.HARVEST:
-        #     if plots:
-        #         for plot in plots:
-        #             farm[plot.row - 1][plot.column - 1] = 1
-        #     else:
-        #         for row in farm:
-        #             for i in range(0, len(row)):
-        #                 row[i] = 1
-        # elif action is PlotActions.WATER:
-        #     if plots:
-        #         for plot in plots:
-        #             farm[plot.row - 1][plot.column - 1] = 1
-        #     else:
-        #         for row in farm:
-        #             for i in range(0, len(row)):
-        #                 row[i] = 1
-        # elif action is PlotActions.PLANT:
-        #     if plots:
-        #         for plot in plots:
-        #             farm[plot.row - 1][plot.column - 1] = 1
-        #     else:
-        #         for row in farm:
-        #             for i in range(0, len(row)):
-        #                 row[i] = 1
-        pass
+        size = FarmSizes.get(self.size)
+        if not coordinates:
+            for row in range(size.rows):
+                for column in range(size.columns):
+                    await self.work_plot(action=action, row=row, column=column)
+
+        for coordinate in coordinates:
+            if coordinate.row is None and coordinate.column is not None:
+                for row in range(size.rows):
+                    await self.work_plot(
+                        action=action, row=row, column=coordinate.column
+                    )
+            elif coordinate.column is None and coordinate.row is not None:
+                for column in range(size.columns):
+                    await self.work_plot(
+                        action=action, row=coordinate.row, column=column
+                    )
 
     def display(self):
-        # output_str = ""
-        # for row in farm:
-        #     for plot in row[:-1]:
-        #         if plot == 1:
-        #             output_str += str(plot) + "--"
-        #         else:
-        #             output_str += str(plot) + "-"
-        #     else:
-        #         if row[-1] == 1:
-        #             output_str += str(row[-1])
-        #         else:
-        #             output_str += str(row[-1])
-        #
-        #     output_str += "\n"
+        # TODO: representation logic
         return self.plot
