@@ -22,7 +22,7 @@ class Player:
         return Player(
             id=player.id,
             balance=player.balance,
-            xp=player.user_xp,
-            level=player.user_level,
+            xp=player.xp,
+            level=player.level,
             energy=player.energy,
         )

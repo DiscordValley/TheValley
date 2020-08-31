@@ -78,10 +78,7 @@ class Farming(commands.Cog):
     ):
         valid = True if catcher is None else False
         await self.action(
-            ctx,
-            input_coordinates,
-            action=PlotActions.HARVEST,
-            valid=valid,
+            ctx, input_coordinates, action=PlotActions.HARVEST, valid=valid,
         )
 
     @commands.command(
@@ -96,10 +93,7 @@ class Farming(commands.Cog):
     ):
         valid = True if catcher is None else False
         await self.action(
-            ctx,
-            input_coordinates,
-            action=PlotActions.WATER,
-            valid=valid,
+            ctx, input_coordinates, action=PlotActions.WATER, valid=valid,
         )
 
     @commands.command(
@@ -114,10 +108,7 @@ class Farming(commands.Cog):
     ):
         valid = True if catcher is None else False
         await self.action(
-            ctx,
-            input_coordinates,
-            action=PlotActions.PLANT,
-            valid=valid,
+            ctx, input_coordinates, action=PlotActions.PLANT, valid=valid,
         )
 
     @staticmethod

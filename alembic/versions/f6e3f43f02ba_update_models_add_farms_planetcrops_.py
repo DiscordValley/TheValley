@@ -1,8 +1,8 @@
-"""Update Models, Add Farms, Plants, Players, Profiles
+"""Update models, Add Farms, PlanetCrops, Players, Profiles
 
-Revision ID: 76553806f621
+Revision ID: f6e3f43f02ba
 Revises: 81d196a1e6cc
-Create Date: 2020-08-29 19:02:43.561572
+Create Date: 2020-08-31 21:14:42.744836
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "76553806f621"
+revision = "f6e3f43f02ba"
 down_revision = "81d196a1e6cc"
 branch_labels = None
 depends_on = None

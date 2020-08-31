@@ -8,8 +8,8 @@ class Player(db.Model):
     user_id = db.Column(db.BIGINT)
     guild_id = db.Column(db.BIGINT)
     balance = db.Column(db.Integer)
-    user_xp = db.Column(db.Integer)
-    user_level = db.Column(db.Integer)
+    xp = db.Column(db.Integer)
+    level = db.Column(db.Integer)
 
     energy = db.Column(db.Integer)
     last_visit = db.Column(db.DateTime)
