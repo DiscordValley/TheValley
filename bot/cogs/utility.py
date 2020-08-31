@@ -81,9 +81,7 @@ class Utility(commands.Cog):
             inline=False,
         )
         embed.add_field(
-            name="Links",
-            value=f"[Invite]({self.bot.invite})",
-            inline=False,
+            name="Links", value=f"[Invite]({self.bot.invite})", inline=False,
         )
         embed.set_footer(
             text="Thank you for using DiscordValley <3",
