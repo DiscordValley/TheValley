@@ -61,7 +61,7 @@ class Farm:
         if not self.validate_coordinate(row, column):
             return
         if self.plot[row][column] is not None:
-            self.plot[row][column].work(action)
+            await self.plot[row][column].work(action)
         else:
             if action is PlotActions.PLANT:
                 self.plot[row][column] = await Crop.new(

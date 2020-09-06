@@ -10,14 +10,14 @@ class Crop:
     farm_id: int
     crop_id: int
     planted_at: datetime
-    state: int
+    state: int = None  # default value until actually loaded from DB
 
     @classmethod
     async def new(cls, farm_id: int, crop_id: int, row: int, column: int):
         crop = await PlantedCrop.create(
             farm_id=farm_id, crop_id=crop_id, coord_column=column, coord_row=row
         )
-        return Crop(crop.id, crop.farm_id, crop.crop_id, crop.planted_at, crop.state)
+        return Crop(crop.id, crop.farm_id, crop.crop_id, crop.planted_at)
 
     async def work(self, action: PlotActions):
         # TODO: work logic for different actions, storing after work etc.
