@@ -1,7 +1,7 @@
 from bot.database.models import Farm as FarmModel
 from bot.database.models import PlantedCrop
 from bot.game.crop import Crop
-from bot.utils.constants import FarmSizes, FARM_SIZE, PlotCoordinate, PlotActions
+from bot.utils.constants import FarmSizes, FARM_DIMENSIONS, PlotCoordinate, PlotActions
 from typing import List
 
 
@@ -10,6 +10,7 @@ class Farm:
         self.id = farm_id
         self.name = name
         self.size = size
+        self.dimensions = FARM_DIMENSIONS.get(self.size)
         self.plot: List[List] = self.initialize_plot()
 
     @classmethod
@@ -26,8 +27,7 @@ class Farm:
         return farm
 
     def initialize_plot(self) -> List[List[Crop]]:
-        size = FARM_SIZE.get(self.size)
-        return [[None] * size.rows] * size.columns
+        return [[None] * self.dimensions.rows] * self.dimensions.columns
 
     async def load_crops(self):
         crops = await PlantedCrop.query.where(FarmModel.id == self.id).gino.all()
@@ -44,12 +44,11 @@ class Farm:
             )
 
     def validate_coordinate(self, row: int = None, column: int = None):
-        size = FARM_SIZE.get(self.size)
         if row is not None:
-            if row >= size.rows or row < 0:
+            if row >= self.dimensions.rows or row < 0:
                 return False
         if column is not None:
-            if column >= size.columns or column < 0:
+            if column >= self.dimensions.columns or column < 0:
                 return False
         return True
 
@@ -70,20 +69,19 @@ class Farm:
                 )  # TODO: Plant kinda needs some crop_id passed doesn't it?
 
     async def work_plots(self, action: PlotActions, coordinates: List[PlotCoordinate]):
-        size = FarmSizes.get(self.size)
         if not coordinates:
-            for row in range(size.rows):
-                for column in range(size.columns):
+            for row in range(self.dimensions.rows):
+                for column in range(self.dimensions.columns):
                     await self.work_plot(action=action, row=row, column=column)
 
         for coordinate in coordinates:
             if coordinate.row is None and coordinate.column is not None:
-                for row in range(size.rows):
+                for row in range(self.dimensions.rows):
                     await self.work_plot(
                         action=action, row=row, column=coordinate.column
                     )
             elif coordinate.column is None and coordinate.row is not None:
-                for column in range(size.columns):
+                for column in range(self.dimensions.columns):
                     await self.work_plot(
                         action=action, row=coordinate.row, column=column
                     )
