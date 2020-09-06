@@ -65,7 +65,7 @@ class Farm:
         else:
             if action is PlotActions.PLANT:
                 self.plot[row][column] = await Crop.new(
-                    farm_id=self.id, crop_id=1
+                    farm_id=self.id, crop_id=1, row=row, column=column
                 )  # TODO: Plant kinda needs some crop_id passed doesn't it?
 
     async def work_plots(self, action: PlotActions, coordinates: List[PlotCoordinate]):
