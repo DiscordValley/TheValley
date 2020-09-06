@@ -113,7 +113,6 @@ class Farming(commands.Cog):
 
     @staticmethod
     async def action(
-        self,
         ctx,
         input_coordinates: List[PlotCoordinate],
         action: PlotActions,
