@@ -9,7 +9,7 @@ class FarmSizes(Enum):
 
 
 @dataclass
-class PlotSize:
+class PlotDimensions:
     rows: int
     columns: int
 
@@ -26,8 +26,8 @@ class PlotActions(Enum):
     PLANT = 3
 
 
-FARM_SIZE = {
-    FarmSizes.SMALL: PlotSize(rows=3, columns=3),
-    FarmSizes.MEDIUM: PlotSize(rows=5, columns=7),
-    FarmSizes.LARGE: PlotSize(rows=7, columns=7),
+FARM_DIMENSIONS = {
+    FarmSizes.SMALL: PlotDimensions(rows=3, columns=3),
+    FarmSizes.MEDIUM: PlotDimensions(rows=5, columns=7),
+    FarmSizes.LARGE: PlotDimensions(rows=7, columns=7),
 }

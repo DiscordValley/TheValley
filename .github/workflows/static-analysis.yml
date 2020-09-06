@@ -15,14 +15,20 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
+        python --version
         python -m pip install --upgrade pip
+        pip --version
         pip install flake8 pipenv black
+        pipenv --version
         pipenv install
     - name: Lint with flake8
       run: |
+        flake8 --version
         # stop the build if there are Python syntax errors or undefined names
         flake8 bot --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 bot --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --ignore=E402,W503,C901
     - name: Run Black
-      run: black bot --check
+      run: |
+        black --version
+        black bot --check

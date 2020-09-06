@@ -66,6 +66,12 @@ class Farming(commands.Cog):
     async def on_ready(self):
         print(f"{type(self).__name__} Cog ready.")
 
+    @commands.command()
+    async def farm(self, ctx):
+        player = await Player.load(user_id=ctx.author.id, guild_id=ctx.guild.id)
+        farm = await Farm.load(player_id=player.id)
+        await ctx.send(farm.display())
+
     @commands.command(
         brief="*Harvest your crops*", help=INSTRUCTIONS.replace("[action]", "harvest")
     )
@@ -78,7 +84,10 @@ class Farming(commands.Cog):
     ):
         valid = True if catcher is None else False
         await self.action(
-            ctx, input_coordinates, action=PlotActions.HARVEST, valid=valid,
+            ctx,
+            input_coordinates,
+            action=PlotActions.HARVEST,
+            valid=valid,
         )
 
     @commands.command(
@@ -93,7 +102,10 @@ class Farming(commands.Cog):
     ):
         valid = True if catcher is None else False
         await self.action(
-            ctx, input_coordinates, action=PlotActions.WATER, valid=valid,
+            ctx,
+            input_coordinates,
+            action=PlotActions.WATER,
+            valid=valid,
         )
 
     @commands.command(
@@ -108,12 +120,14 @@ class Farming(commands.Cog):
     ):
         valid = True if catcher is None else False
         await self.action(
-            ctx, input_coordinates, action=PlotActions.PLANT, valid=valid,
+            ctx,
+            input_coordinates,
+            action=PlotActions.PLANT,
+            valid=valid,
         )
 
     @staticmethod
     async def action(
-        self,
         ctx,
         input_coordinates: List[PlotCoordinate],
         action: PlotActions,
