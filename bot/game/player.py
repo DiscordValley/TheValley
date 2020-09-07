@@ -22,8 +22,8 @@ class Player:
     async def load(cls, user_id: int, guild_id: int):
         player = (
             await PlayerModel.query.where(PlayerModel.user_id == user_id)
-                .where(PlayerModel.guild_id == guild_id)
-                .gino.first()
+            .where(PlayerModel.guild_id == guild_id)
+            .gino.first()
         )
         if player is None:
             player = await PlayerModel.create(user_id=user_id, guild_id=guild_id)
@@ -40,15 +40,15 @@ class Player:
         """**Use to give XP after a successful command.**
 
         USAGE:
-        player, levelled_up = await Player.update_xp(
+        player, leveled_up = await Player.update_xp(
             user_id=message.author.id, guild_id=message.guild.id, modifier=0
         )
 
         """
         player = (
             await PlayerModel.query.where(PlayerModel.user_id == user_id)
-                .where(PlayerModel.guild_id == guild_id)
-                .gino.first()
+            .where(PlayerModel.guild_id == guild_id)
+            .gino.first()
         )
         if player is None:
             player = await PlayerModel.create(user_id=user_id, guild_id=guild_id)
@@ -59,29 +59,35 @@ class Player:
             xp = player.xp + abs(
                 int(
                     (
+                        (
                             (
-                                    (
-                                            1
-                                            * random.randint(1, 10)
-                                            * abs(player.level - (player.level * 0.4))
-                                    )
-                                    / (5 * 1)
+                                1
+                                * random.randint(1, 10)
+                                * abs(player.level - (player.level * 0.4))
                             )
-                            * (
+                            / (5 * 1)
+                        )
+                        * (
+                            (
+                                pow(
                                     (
-                                            pow(((2 * abs(player.level - (player.level * 0.4))) + 10), 2.5)
-                                            / pow(
-                                        (
-                                                abs(player.level - (player.level * 0.4))
-                                                + player.level
-                                                + 10
-                                        ),
-                                        2.5,
-                                    )
-                                    )
-                                    + 1
+                                        (2 * abs(player.level - (player.level * 0.4)))
+                                        + 10
+                                    ),
+                                    2.5,
+                                )
+                                / pow(
+                                    (
+                                        abs(player.level - (player.level * 0.4))
+                                        + player.level
+                                        + 10
+                                    ),
+                                    2.5,
+                                )
                             )
-                            * modifier
+                            + 1
+                        )
+                        * modifier
                     )
                 )
             )
@@ -99,4 +105,7 @@ class Player:
 
         await player.update(level=int(player_level)).apply()
 
-        return await Player.load(user_id=user_id, guild_id=guild_id), player_level != og_level
+        return (
+            await Player.load(user_id=user_id, guild_id=guild_id),
+            player_level != og_level,
+        )
