@@ -1,5 +1,5 @@
 import random
-from typing import Tuple
+from typing import Tuple, Union
 
 import ujson
 
@@ -30,11 +30,11 @@ class Player:
         if player_db is None:
             player_db = await PlayerModel.create(user_id=user_id, guild_id=guild_id)
         player = Player(
-            id=player.id,
-            balance=player.balance,
-            xp=player.xp,
-            level=player.level,
-            energy=player.energy,
+            id=player_db.id,
+            balance=player_db.balance,
+            xp=player_db.xp,
+            level=player_db.level,
+            energy=player_db.energy,
         )
         if db_object:
             return player, player_db
