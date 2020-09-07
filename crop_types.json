@@ -1,0 +1,27 @@
+{
+	"1":
+			{
+				"name": "Cauliflower",
+				"description": "Valuable, but slow-growing. Despite its pale color, the florets are packed with nutrients.",
+				"stages": [
+					{"emote": "<:Cauliflower_Stage_1:752598705475026964>", "minutes": 20},
+					{"emote": "<:Cauliflower_Stage_2:752598705420501082>", "minutes": 20},
+					{"emote": "<:Cauliflower_Stage_3:752598705395466290>", "minutes": 20},
+					{"emote": "<:Cauliflower_Stage_4:752598705856577636>", "minutes": 20},
+					{"emote": "<:Cauliflower_Stage_5:752598705391141004>", "minutes": 20},
+					{"emote": "<:Cauliflower_Stage_6:752598705055727617>", "minutes": 20}
+				]
+			},
+	"2":
+			{
+				"name": "Parsnip",
+				"description": "A spring tuber closely related to the carrot. It has an earthy taste and is full of nutrients.",
+				"stages": [
+					{"emote": "<:Parsnip_Stage_1:752600752895033496>", "minutes": 2},
+					{"emote": "<:Parsnip_Stage_2:752600752970792990>", "minutes": 2},
+					{"emote": "<:Parsnip_Stage_3:752600752689643631>", "minutes": 2},
+					{"emote": "<:Parsnip_Stage_4:752600753012474006>", "minutes": 2},
+					{"emote": "<:Parsnip_Stage_5:752600752576266411>", "minutes": 2}
+				]
+			}
+}
