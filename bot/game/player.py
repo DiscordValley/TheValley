@@ -19,7 +19,9 @@ class Player:
     energy: int
 
     @classmethod
-    async def load(cls, user_id: int, guild_id: int, db_object: bool = False) -> Union["Player", Tuple["Player", PlayerModel]]:
+    async def load(
+        cls, user_id: int, guild_id: int, db_object: bool = False
+    ) -> Union["Player", Tuple["Player", PlayerModel]]:
         player_db = (
             await PlayerModel.query.where(PlayerModel.user_id == user_id)
             .where(PlayerModel.guild_id == guild_id)
@@ -49,7 +51,9 @@ class Player:
         )
 
         """
-        player, player_db = await Player.load(user_id=user_id, guild_id=guild_id, db_object=True)
+        player, player_db = await Player.load(
+            user_id=user_id, guild_id=guild_id, db_object=True
+        )
 
         modifier += 0.1
 
@@ -69,7 +73,13 @@ class Player:
                             (
                                 pow(
                                     (
-                                        (2 * abs(player_db.level - (player_db.level * 0.4)))
+                                        (
+                                            2
+                                            * abs(
+                                                player_db.level
+                                                - (player_db.level * 0.4)
+                                            )
+                                        )
                                         + 10
                                     ),
                                     2.5,
