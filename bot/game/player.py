@@ -10,6 +10,48 @@ with open("levels.json", "r") as f:
     LEVELS = ujson.load(f)
 
 
+def xp_formula(player_db: PlayerModel, modifier: float):
+    if player.level > 4:
+        xp = player_db.xp + abs(
+            int(
+                (
+                    (
+                        (
+                            1
+                            * random.randint(1, 10)
+                            * abs(player_db.level - (player_db.level * 0.4))
+                        )
+                        / (5 * 1)
+                    )
+                    * (
+                        (
+                            pow(
+                                (
+                                    (2 * abs(player_db.level - (player_db.level * 0.4)))
+                                    + 10
+                                ),
+                                2.5,
+                            )
+                            / pow(
+                                (
+                                    abs(player_db.level - (player_db.level * 0.4))
+                                    + player_db.level
+                                    + 10
+                                ),
+                                2.5,
+                            )
+                        )
+                        + 1
+                    )
+                    * modifier
+                )
+            )
+        )
+    else:
+        xp = player_db.xp + abs(random.randint(1, 5))
+    return xp
+
+
 @dataclass
 class Player:
     id: int
@@ -57,59 +99,18 @@ class Player:
 
         modifier += 0.1
 
-        if player.level > 4:
-            xp = player_db.xp + abs(
-                int(
-                    (
-                        (
-                            (
-                                1
-                                * random.randint(1, 10)
-                                * abs(player_db.level - (player_db.level * 0.4))
-                            )
-                            / (5 * 1)
-                        )
-                        * (
-                            (
-                                pow(
-                                    (
-                                        (
-                                            2
-                                            * abs(
-                                                player_db.level
-                                                - (player_db.level * 0.4)
-                                            )
-                                        )
-                                        + 10
-                                    ),
-                                    2.5,
-                                )
-                                / pow(
-                                    (
-                                        abs(player_db.level - (player_db.level * 0.4))
-                                        + player_db.level
-                                        + 10
-                                    ),
-                                    2.5,
-                                )
-                            )
-                            + 1
-                        )
-                        * modifier
-                    )
-                )
-            )
-        else:
-            xp = player_db.xp + abs(random.randint(1, 5))
+        xp = xp_formula(player_db, modifier)
 
         await player_db.update(xp=xp).apply()
 
         og_level = player_db.level
 
         player_level = 1
-        for level in LEVELS.keys():
-            if player_db.xp >= LEVELS[level]:
+        for level, xp in LEVELS.items():
+            if player_db.xp >= xp:
                 player_level = level
+            else:
+                break
 
         await player_db.update(level=int(player_level)).apply()
 
