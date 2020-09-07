@@ -19,21 +19,25 @@ class Player:
     energy: int
 
     @classmethod
-    async def load(cls, user_id: int, guild_id: int):
-        player = (
+    async def load(cls, user_id: int, guild_id: int, db_object: bool = False) -> Union["Player", Tuple["Player", PlayerModel]]:
+        player_db = (
             await PlayerModel.query.where(PlayerModel.user_id == user_id)
             .where(PlayerModel.guild_id == guild_id)
             .gino.first()
         )
-        if player is None:
-            player = await PlayerModel.create(user_id=user_id, guild_id=guild_id)
-        return Player(
+        if player_db is None:
+            player_db = await PlayerModel.create(user_id=user_id, guild_id=guild_id)
+        player = Player(
             id=player.id,
             balance=player.balance,
             xp=player.xp,
             level=player.level,
             energy=player.energy,
         )
+        if db_object:
+            return player, player_db
+        else:
+            return player
 
     @classmethod
     async def update_xp(cls, user_id, guild_id, modifier) -> Tuple["Player", bool]:
@@ -45,25 +49,19 @@ class Player:
         )
 
         """
-        player = (
-            await PlayerModel.query.where(PlayerModel.user_id == user_id)
-            .where(PlayerModel.guild_id == guild_id)
-            .gino.first()
-        )
-        if player is None:
-            player = await PlayerModel.create(user_id=user_id, guild_id=guild_id)
+        player, player_db = await Player.load(user_id=user_id, guild_id=guild_id, db_object=True)
 
         modifier += 0.1
 
         if player.level > 4:
-            xp = player.xp + abs(
+            xp = player_db.xp + abs(
                 int(
                     (
                         (
                             (
                                 1
                                 * random.randint(1, 10)
-                                * abs(player.level - (player.level * 0.4))
+                                * abs(player_db.level - (player_db.level * 0.4))
                             )
                             / (5 * 1)
                         )
@@ -71,15 +69,15 @@ class Player:
                             (
                                 pow(
                                     (
-                                        (2 * abs(player.level - (player.level * 0.4)))
+                                        (2 * abs(player_db.level - (player_db.level * 0.4)))
                                         + 10
                                     ),
                                     2.5,
                                 )
                                 / pow(
                                     (
-                                        abs(player.level - (player.level * 0.4))
-                                        + player.level
+                                        abs(player_db.level - (player_db.level * 0.4))
+                                        + player_db.level
                                         + 10
                                     ),
                                     2.5,
@@ -92,20 +90,20 @@ class Player:
                 )
             )
         else:
-            xp = player.xp + abs(random.randint(1, 5))
+            xp = player_db.xp + abs(random.randint(1, 5))
 
-        await player.update(xp=xp).apply()
+        await player_db.update(xp=xp).apply()
 
-        og_level = player.level
+        og_level = player_db.level
 
         player_level = 1
         for level in LEVELS.keys():
-            if player.xp >= LEVELS[level]:
+            if player_db.xp >= LEVELS[level]:
                 player_level = level
 
-        await player.update(level=int(player_level)).apply()
+        await player_db.update(level=int(player_level)).apply()
 
         return (
-            await Player.load(user_id=user_id, guild_id=guild_id),
+            player,
             player_level != og_level,
         )
