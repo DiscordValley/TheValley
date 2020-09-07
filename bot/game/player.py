@@ -11,7 +11,7 @@ with open("levels.json", "r") as f:
 
 
 def xp_formula(player_db: PlayerModel, modifier: float):
-    if player.level > 4:
+    if player_db.level > 4:
         xp = player_db.xp + abs(
             int(
                 (
