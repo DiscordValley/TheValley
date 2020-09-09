@@ -33,7 +33,7 @@ class Farm:
         ]
 
     async def load_crops(self):
-        crops = await PlantedCrop.query.where(FarmModel.id == self.id).gino.all()
+        crops = await PlantedCrop.query.where(PlantedCrop.farm_id == self.id).gino.all()
         for crop in crops:
             self.place_crop(
                 Crop(
