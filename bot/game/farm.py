@@ -2,7 +2,7 @@ from bot.database.models import Farm as FarmModel
 from bot.database.models import PlantedCrop
 from bot.game.crop import Crop
 from bot.utils.constants import FarmSizes, FARM_DIMENSIONS, PlotCoordinate, PlotActions
-from typing import List
+from typing import List, Optional
 
 
 class Farm:
@@ -26,8 +26,11 @@ class Farm:
         await farm.load_crops()
         return farm
 
-    def initialize_plot(self) -> List[List[Crop]]:
-        return [[None] * self.dimensions.rows] * self.dimensions.columns
+    def initialize_plot(self) -> List[List[Optional[Crop]]]:
+        return [
+            [None for _ in range(self.dimensions.rows)]
+            for _ in range(self.dimensions.columns)
+        ]
 
     async def load_crops(self):
         crops = await PlantedCrop.query.where(FarmModel.id == self.id).gino.all()
