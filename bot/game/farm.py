@@ -64,6 +64,7 @@ class Farm:
         if not self.validate_coordinate(row, column):
             return
         if self.plot[row][column] is not None:
+
             await self.plot[row][column].work(action)
         else:
             if action is PlotActions.PLANT:
@@ -88,6 +89,10 @@ class Farm:
                     await self.work_plot(
                         action=action, row=coordinate.row, column=column
                     )
+            elif coordinate.row and coordinate.column:
+                await self.work_plot(
+                    action=action, row=coordinate.row, column=coordinate.column
+                )
 
     def display(self):
         # TODO: representation logic

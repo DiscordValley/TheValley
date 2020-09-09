@@ -20,5 +20,6 @@ class Crop:
         return Crop(crop.id, crop.farm_id, crop.crop_id, crop.planted_at)
 
     async def work(self, action: PlotActions):
+        print(f"Work {self.id=} {action=}")
         # TODO: work logic for different actions, storing after work etc.
         self.state = action.value

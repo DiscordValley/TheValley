@@ -43,7 +43,7 @@ class PlotCoordinateConverter(commands.Converter):
             row = int(out_coordinate[1])
         else:
             match_a = re.match(r"[A-Za-z]+", in_coordinate, re.I)
-            match_1 = re.match(r"\d+", in_coordinate, re.I)
+            match_1 = re.match(r"[0-9]+", in_coordinate, re.I)
             if match_a:
                 out_coordinate = match_a.group()
                 column = out_coordinate[0]
@@ -54,7 +54,10 @@ class PlotCoordinateConverter(commands.Converter):
                 column = None
             else:
                 raise ValueError
-        column = ord(column.lower()) - ord("a") + 1 if column else None
+        column = ord(column.lower()) - ord("a") if column else None
+        row = row - 1 if row else None
+        if (row and row < 0) or (column and column < 0):
+            raise ValueError
         return PlotCoordinate(row, column)
 
 
