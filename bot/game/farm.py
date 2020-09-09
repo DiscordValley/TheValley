@@ -2,7 +2,7 @@ from bot.database.models import Farm as FarmModel
 from bot.database.models import PlantedCrop
 from bot.game.crop import Crop
 from bot.utils.constants import FarmSizes, FARM_DIMENSIONS, PlotCoordinate, PlotActions
-from typing import List
+from typing import List, Optional
 
 
 class Farm:
@@ -26,11 +26,14 @@ class Farm:
         await farm.load_crops()
         return farm
 
-    def initialize_plot(self) -> List[List[Crop]]:
-        return [[None] * self.dimensions.rows] * self.dimensions.columns
+    def initialize_plot(self) -> List[List[Optional[Crop]]]:
+        return [
+            [None for _ in range(self.dimensions.rows)]
+            for _ in range(self.dimensions.columns)
+        ]
 
     async def load_crops(self):
-        crops = await PlantedCrop.query.where(FarmModel.id == self.id).gino.all()
+        crops = await PlantedCrop.query.where(PlantedCrop.farm_id == self.id).gino.all()
         for crop in crops:
             self.place_crop(
                 Crop(
@@ -61,6 +64,7 @@ class Farm:
         if not self.validate_coordinate(row, column):
             return
         if self.plot[row][column] is not None:
+
             await self.plot[row][column].work(action)
         else:
             if action is PlotActions.PLANT:
@@ -85,6 +89,10 @@ class Farm:
                     await self.work_plot(
                         action=action, row=coordinate.row, column=column
                     )
+            elif coordinate.row and coordinate.column:
+                await self.work_plot(
+                    action=action, row=coordinate.row, column=coordinate.column
+                )
 
     def display(self):
         # TODO: representation logic
