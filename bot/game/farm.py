@@ -107,7 +107,7 @@ class Farm:
                 if crop is None:
                     farm_land += "<:Crop_Land:753444938791911474>"  # Dirt Emoji
                     continue
-                farm_land += crop_data[str(crop.crop_id)]['stages'][crop.state]['emote']
+                farm_land += crop_data[str(crop.crop_id)]["stages"][crop.state]["emote"]
             farm_land += "\n"
         embed = Embed(title=self.name, description=farm_land)
         return embed
