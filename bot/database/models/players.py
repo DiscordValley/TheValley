@@ -7,12 +7,12 @@ class Player(db.Model):
     id = db.Column(db.BIGINT, primary_key=True)
     user_id = db.Column(db.BIGINT)
     guild_id = db.Column(db.BIGINT)
-    balance = db.Column(db.Integer)
-    xp = db.Column(db.Integer)
-    level = db.Column(db.Integer)
+    balance = db.Column(db.Integer, default=0)
+    xp = db.Column(db.Integer, default=0)
+    level = db.Column(db.Integer, default=1)
 
-    energy = db.Column(db.Integer)
+    energy = db.Column(db.Integer, default=100)
     last_visit = db.Column(db.DateTime)
-    allow_notification = db.Column(db.Boolean)
+    allow_notification = db.Column(db.Boolean, default=False)
 
     _guild_user_uniq = db.UniqueConstraint("user_id", "guild_id", name="guild_user")
