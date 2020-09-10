@@ -2,7 +2,13 @@ from bot.database.models import Farm as FarmModel
 from bot.database.models import PlantedCrop
 from bot.game.crop import Crop
 from bot.utils.constants import FarmSizes, FARM_DIMENSIONS, PlotCoordinate, PlotActions
+from discord import Embed
 from typing import List, Optional
+import ujson
+
+
+with open("crop_types.json") as f:
+    crop_data = ujson.load(f)
 
 
 class Farm:
@@ -95,5 +101,13 @@ class Farm:
                 )
 
     def display(self):
-        # TODO: representation logic
-        return self.plot
+        farm_land = ""
+        for row in self.plot:
+            for crop in row:
+                if crop is None:
+                    farm_land += "<:Crop_Land:753444938791911474>"  # Dirt Emoji
+                    continue
+                farm_land += crop_data[str(crop.crop_id)]['stages'][crop.state]['emote']
+            farm_land += "\n"
+        embed = Embed(title=self.name, description=farm_land)
+        return embed

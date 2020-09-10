@@ -73,7 +73,7 @@ class Farming(commands.Cog):
     async def farm(self, ctx):
         player = await Player.load(user_id=ctx.author.id, guild_id=ctx.guild.id)
         farm = await Farm.load(player_id=player.id)
-        await ctx.send(farm.display())
+        await ctx.send(embed=farm.display())
 
     @commands.command(
         brief="*Harvest your crops*", help=INSTRUCTIONS.replace("[action]", "harvest")
