@@ -1,0 +1,61 @@
+{
+  "seeds": [
+    {
+      "name": "Cauliflower Seeds",
+      "description": "Valuable, but slow-growing. Despite its pale color, the florets are packed with nutrients.",
+      "price": 100,
+      "stock": 1000,
+      "item_id": 1234
+    },
+    {
+      "name": "Parsnip Seeds",
+      "description": "A spring tuber closely related to the carrot. It has an earthy taste and is full of nutrients.",
+      "price": 100,
+      "stock": 1000,
+      "item_id": 2345
+    },
+    {
+      "name": "Potato Seeds",
+      "description": "Plant these in the spring. Takes 6 days to mature, and has a chance of yielding multiple potatoes at harvest.",
+      "price": 100,
+      "stock": 1000,
+      "item_id": 5654
+    },
+    {
+      "name": "Carrot Seeds",
+      "description": "Plant these in the spring. Takes 6 days to mature, and has a chance of yielding multiple carrots at harvest.",
+      "price": 100,
+      "stock": 1000,
+      "item_id": 4563
+    },
+    {
+      "name": "Pepper Seeds",
+      "description": "Plant these in the summer. Takes 5 days to mature, and continues to produce after first harvest.",
+      "price": 100,
+      "stock": 1000,
+      "item_id": 122334
+    }
+  ],
+  "tools": [
+    {
+      "name": "Improved Hoe",
+      "description": "Better than your starter hoe, definitely better than the hoe on the corner.",
+      "price": 3000,
+      "item_id": 98765
+    },
+    {
+      "name": "Improved Watering Can",
+      "description": "Holds more water than the staring can, but not as much as the whale you saw at the pool",
+      "price": 15000,
+      "item_id": 134235
+    }
+  ],
+  "iotd": [
+    {
+      "name": "Cool AF Item",
+      "description": "Bad ass mo-fo item, yah yeet.",
+      "price": 150000,
+      "item_id": 65879846
+    }
+  ]
+}
