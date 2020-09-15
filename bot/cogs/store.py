@@ -43,7 +43,9 @@ class Store(commands.Cog):
                 price = tool["price"]
                 item_id = tool["item_id"]
 
-                tool_descriptions += f"**{index +1}.** {name} (*{item_id}*) **|** {price}\n"
+                tool_descriptions += (
+                    f"**{index +1}.** {name} (*{item_id}*) **|** {price}\n"
+                )
             except KeyError:
                 continue
 
@@ -56,7 +58,9 @@ class Store(commands.Cog):
                 item_id = item["item_id"]
                 desc = item["description"]
 
-                iotd_descriptions += f'**Name: {name}** *{item_id}*\n **{price}** \n {desc}'
+                iotd_descriptions += (
+                    f"**Name: {name}** *{item_id}*\n **{price}** \n {desc}"
+                )
             except KeyError:
                 continue
 
