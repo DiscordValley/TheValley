@@ -22,36 +22,41 @@ class Store(commands.Cog):
         """*Store command of bot. Will show static seeds for now.*
         **Example**: `{prefix}store`"""
 
-        seeds = data['seeds']
+        seeds = data["seeds"]
         seed_json = [
-             (product['name'], product['price'], product['stock'], product['item_id']) for product in seeds
+            (product["name"], product["price"], product["stock"], product["item_id"])
+            for product in seeds
         ]
 
-        tool = data['tools']
+        tool = data["tools"]
         tool_json = [
-            (tools['name'], tools['price'], tools['item_id']) for tools in tool
+            (tools["name"], tools["price"], tools["item_id"]) for tools in tool
         ]
 
-        IOTD = data['iotd']
-        iotd_json = [
-            (spec['name'], spec['price'], spec['item_id']) for spec in IOTD
-        ]
+        IOTD = data["iotd"]
+        iotd_json = [(spec["name"], spec["price"], spec["item_id"]) for spec in IOTD]
 
-        descriptionSeeds = ''
+        descriptionSeeds = ""
         for item in seed_json:
-            descriptionSeeds += f'**{seed_json.index(item) + 1}.** {item[0]} **|** {item[1]} **|** {item[2]} **|** {item[3]}\n'
+            descriptionSeeds += f"**{seed_json.index(item) + 1}.** {item[0]} **|** {item[1]} **|** {item[2]} **|** {item[3]}\n"
 
-        descriptionTools = ''
+        descriptionTools = ""
         for item in tool_json:
-            descriptionTools += f'**{tool_json.index(item) + 1}.** {item[0]} **|** {item[1]} **|** {item[2]}\n'
+            descriptionTools += f"**{tool_json.index(item) + 1}.** {item[0]} **|** {item[1]} **|** {item[2]}\n"
 
-        descriptionIOTD = ''
+        descriptionIOTD = ""
         for item in iotd_json:
-            descriptionIOTD += f'**{iotd_json.index(item) + 1}.** {item[0]} **|** {item[1]} **|** {item[2]}\n'
+            descriptionIOTD += f"**{iotd_json.index(item) + 1}.** {item[0]} **|** {item[1]} **|** {item[2]}\n"
         embeds = [
-            discord.Embed(title="Seed Store", description=descriptionSeeds, color=0x115599),
-            discord.Embed(title="Tool Store", description=descriptionTools, color=0x115599),
-            discord.Embed(title="Item Of The Day", description=descriptionIOTD, color=0x115599)
+            discord.Embed(
+                title="Seed Store", description=descriptionSeeds, color=0x115599
+            ),
+            discord.Embed(
+                title="Tool Store", description=descriptionTools, color=0x115599
+            ),
+            discord.Embed(
+                title="Item Of The Day", description=descriptionIOTD, color=0x115599
+            ),
         ]
 
         paginator = BotEmbedPaginator(ctx, embeds)
