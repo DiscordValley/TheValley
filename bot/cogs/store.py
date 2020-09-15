@@ -6,7 +6,7 @@ from disputils import BotEmbedPaginator, BotConfirmation, BotMultipleChoice
 from datetime import datetime
 
 with open("shop.json", "r") as f:
-    data = json.load(f)
+    SHOPS_DATA = json.load(f)
 
 
 class Store(commands.Cog):
@@ -22,7 +22,7 @@ class Store(commands.Cog):
         """*Store command of bot. Will show static seeds for now.*
         **Example**: `{prefix}store`"""
 
-        seeds = data.get("seeds", [])
+        seeds = SHOPS_DATA.get("seeds", [])
         seed_descriptions = ""
         for index, product in enumerate(seeds):
             try:
@@ -35,7 +35,7 @@ class Store(commands.Cog):
             except KeyError:
                 continue
 
-        tools = data.get("tools", [])
+        tools = SHOPS_DATA.get("tools", [])
         tool_descriptions = ""
         for index, tool in enumerate(tools):
             try:
@@ -49,7 +49,7 @@ class Store(commands.Cog):
             except KeyError:
                 continue
 
-        iotd = data.get("iotd", [])
+        iotd = SHOPS_DATA.get("iotd", [])
         iotd_descriptions = ""
         for index, item in enumerate(iotd):
             try:
