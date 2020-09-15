@@ -22,40 +22,53 @@ class Store(commands.Cog):
         """*Store command of bot. Will show static seeds for now.*
         **Example**: `{prefix}store`"""
 
-        seeds = data["seeds"]
-        seed_json = [
-            (product["name"], product["price"], product["stock"], product["item_id"])
-            for product in seeds
-        ]
+        seeds = data.get("seeds", [])
+        seed_descriptions = ""
+        for index, product in enumerate(seeds):
+            try:
+                name = product["name"]
+                price = product["price"]
+                stock = product["stock"]
+                item_id = product["item_id"]
 
-        tool = data["tools"]
-        tool_json = [
-            (tools["name"], tools["price"], tools["item_id"]) for tools in tool
-        ]
+                seed_descriptions += f"**{index + 1}.** {name} (*{item_id}*) **|** {price} **|** {stock}\n"
+            except KeyError:
+                continue
 
-        IOTD = data["iotd"]
-        iotd_json = [(spec["name"], spec["price"], spec["item_id"]) for spec in IOTD]
+        tools = data.get("tools", [])
+        tool_descriptions = ""
+        for index, tool in enumerate(tools):
+            try:
+                name = tool["name"]
+                price = tool["price"]
+                item_id = tool["item_id"]
 
-        descriptionSeeds = ""
-        for item in seed_json:
-            descriptionSeeds += f"**{seed_json.index(item) + 1}.** {item[0]} **|** {item[1]} **|** {item[2]} **|** {item[3]}\n"
+                tool_descriptions += f"**{index +1}.** {name} (*{item_id}*) **|** {price}\n"
+            except KeyError:
+                continue
 
-        descriptionTools = ""
-        for item in tool_json:
-            descriptionTools += f"**{tool_json.index(item) + 1}.** {item[0]} **|** {item[1]} **|** {item[2]}\n"
+        iotd = data.get("iotd", [])
+        iotd_descriptions = ""
+        for index, item in enumerate(iotd):
+            try:
+                name = item["name"]
+                price = item["price"]
+                item_id = item["item_id"]
+                desc = item["description"]
 
-        descriptionIOTD = ""
-        for item in iotd_json:
-            descriptionIOTD += f"**{iotd_json.index(item) + 1}.** {item[0]} **|** {item[1]} **|** {item[2]}\n"
+                iotd_descriptions += f'**Name: {name}** *{item_id}*\n **{price}** \n {desc}'
+            except KeyError:
+                continue
+
         embeds = [
             discord.Embed(
-                title="Seed Store", description=descriptionSeeds, color=0x115599
+                title="Seed Store", description=seed_descriptions, color=0x115599
             ),
             discord.Embed(
-                title="Tool Store", description=descriptionTools, color=0x115599
+                title="Tool Store", description=tool_descriptions, color=0x115599
             ),
             discord.Embed(
-                title="Item Of The Day", description=descriptionIOTD, color=0x115599
+                title="Item Of The Day", description=iotd_descriptions, color=0x115599
             ),
         ]
 
