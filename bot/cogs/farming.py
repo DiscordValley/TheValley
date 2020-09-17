@@ -132,7 +132,7 @@ class Farming(commands.Cog):
             input_coordinates,
             action=PlotActions.PLANT,
             valid=valid,
-            crop_name=crop_name
+            crop_name=crop_name,
         )
 
     @staticmethod

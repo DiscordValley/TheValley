@@ -80,7 +80,10 @@ class Farm:
                 )
 
     async def work_plots(
-        self, action: PlotActions, coordinates: List[PlotCoordinate], crop_id: int = None
+        self,
+        action: PlotActions,
+        coordinates: List[PlotCoordinate],
+        crop_id: int = None,
     ):
         if not coordinates:
             for row in range(self.dimensions.rows):
