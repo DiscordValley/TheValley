@@ -158,9 +158,9 @@ class Farming(commands.Cog):
 
         crop_id = None
         if action == PlotActions.PLANT:
-            for crop in zip(CROP_DATA.keys(), CROP_DATA.values()):
-                if crop_name.casefold() == crop[1]["name"].casefold():
-                    crop_id = int(crop[0])
+            for key, value in CROP_DATA.items():
+                if crop_name.casefold() == value.get("name", "invalid").casefold():
+                    crop_id = int(key)
                     break
             if crop_id is None:
                 return await ctx.send(embed=CROP_NOT_FOUND)
