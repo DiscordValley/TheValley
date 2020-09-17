@@ -4,11 +4,15 @@ import re
 from typing import List
 
 from bot.game import Farm, Player
-from bot.utils.constants import PlotCoordinate, PlotActions
+from bot.utils.constants import PlotCoordinate, PlotActions, CROP_DATA
 
 
 PLOT_NOT_FOUND = discord.Embed(
     description="The plot specified was not recognized. Please try again."
+)
+
+CROP_NOT_FOUND = discord.Embed(
+    description="The crop specified was not recognized. Please try again."
 )
 
 INSTRUCTIONS = """
@@ -117,6 +121,7 @@ class Farming(commands.Cog):
     async def plant(
         self,
         ctx,
+        crop_name: str,
         input_coordinates: commands.Greedy[PlotCoordinateConverter],
         *,
         catcher: str = None,
@@ -127,6 +132,7 @@ class Farming(commands.Cog):
             input_coordinates,
             action=PlotActions.PLANT,
             valid=valid,
+            crop_name=crop_name
         )
 
     @staticmethod
@@ -134,6 +140,7 @@ class Farming(commands.Cog):
         ctx,
         input_coordinates: List[PlotCoordinate],
         action: PlotActions,
+        crop_name: str = None,
         valid: bool = True,
     ):
         if not valid:
@@ -149,9 +156,20 @@ class Farming(commands.Cog):
                 ):
                     return await ctx.send(embed=PLOT_NOT_FOUND)
 
-        await farm.work_plots(action=action, coordinates=input_coordinates)
+        crop_id = None
+        if action == PlotActions.PLANT:
+            for crop in zip(CROP_DATA.keys(), CROP_DATA.values()):
+                if crop_name.casefold() == crop[1]["name"].casefold():
+                    crop_id = int(crop[0])
+                    break
+            if crop_id is None:
+                return await ctx.send(embed=CROP_NOT_FOUND)
 
-        await ctx.send(farm.display())
+        await farm.work_plots(
+            action=action, coordinates=input_coordinates, crop_id=crop_id
+        )
+
+        await ctx.send(embed=farm.display())
 
 
 def setup(bot):
