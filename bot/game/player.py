@@ -4,6 +4,8 @@ from typing import Tuple, Union, List
 import ujson
 
 from bot.database.models import Player as PlayerModel
+from bot.database.models import Item as ItemModel
+from bot.database.models import Inventory as InventoryModel
 from dataclasses import dataclass
 
 with open("levels.json", "r") as f:
@@ -104,6 +106,30 @@ class Player:
         for leader in leaders:
             players.append(await Player.load(player_obj=leader))
         return players
+
+    @classmethod
+    async def sell(
+            cls,
+            item_id: int,
+            player_id: int,
+            quantity: int
+    ):
+        selling = (
+            await InventoryModel.query.where(InventoryModel.id == player_id)
+            .update(quantity)
+            .where(item_id=item_id)
+        )
+
+        return selling
+
+    @classmethod
+    async def item(cls, item_id: int):
+        item_query = (
+            await ItemModel.query.where(ItemModel.item_id == item_id)
+            .gino()
+        )
+
+        return item_query
 
     @classmethod
     async def update_xp(cls, user_id, guild_id, modifier) -> Tuple["Player", bool]:

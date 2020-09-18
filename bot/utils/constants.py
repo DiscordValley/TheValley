@@ -1,8 +1,16 @@
 from enum import Enum
 from dataclasses import dataclass
 
+import discord
+
 
 class FarmSizes(Enum):
+    SMALL = 0
+    MEDIUM = 1
+    LARGE = 2
+
+
+class InventorySizes(Enum):
     SMALL = 0
     MEDIUM = 1
     LARGE = 2
@@ -31,3 +39,7 @@ FARM_DIMENSIONS = {
     FarmSizes.MEDIUM: PlotDimensions(rows=5, columns=7),
     FarmSizes.LARGE: PlotDimensions(rows=7, columns=7),
 }
+
+COLOR_ERROR = discord.Color.red()
+
+COLOR_SUCCESS = discord.Color.green()
