@@ -1,5 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass
+import ujson
 
 
 class FarmSizes(Enum):
@@ -31,3 +32,6 @@ FARM_DIMENSIONS = {
     FarmSizes.MEDIUM: PlotDimensions(rows=5, columns=7),
     FarmSizes.LARGE: PlotDimensions(rows=7, columns=7),
 }
+
+with open("crop_types.json") as f:
+    CROP_DATA = ujson.load(f)
