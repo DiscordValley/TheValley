@@ -7,8 +7,15 @@ from discord.ext import commands
 
 from bot import utils
 
+from disputils import BotEmbedPaginator
+
+
 PY_VERSION = (
     f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+)
+
+COMMAND_NOT_FOUND = discord.Embed(
+    description="The command specified was not recognized. Please try again."
 )
 
 
@@ -101,6 +108,37 @@ class Utility(commands.Cog):
         embed.set_footer(
             text="Thank you for using DiscordValley <3",
             icon_url=self.bot.user.avatar_url,
+        )
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def help(self, ctx, command_name: str = None):
+        """*Shows this message*"""
+        prefix = utils.get_guild_prefix(self.bot, ctx.guild.id)
+        if command_name is None:
+            embeds = []
+            for cog in self.bot.cogs:
+                embed = discord.Embed(title=cog)
+                for command in self.bot.get_cog(cog).get_commands():
+                    brief = command.short_doc
+                    if brief is False:
+                        brief = "Command brief not found not"
+                    if command.hidden:
+                        continue
+                    embed.add_field(
+                        name=f"{prefix}{command.name}", value=brief, inline=False
+                    )
+                embeds.append(embed)
+            paginator = BotEmbedPaginator(ctx, embeds)
+            await paginator.run()
+            return
+        command = self.bot.get_command(command_name.casefold())
+        if command is None:
+            await ctx.send(embed=COMMAND_NOT_FOUND)
+            return
+        embed = discord.Embed(
+            title=f"{prefix}{command.name}",
+            description=f"```{command.help.format(prefix=prefix)}```",
         )
         await ctx.send(embed=embed)
 
