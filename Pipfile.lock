@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1d21f38c545ae7baf5a900788788cacbf9f48c569d39d15de8f1e4f1e8ebe134"
+            "sha256": "a61d888239c468f3e7231b3148f0f4417b131d8ff4f1a4d91dc069a34104e34d"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -34,10 +34,11 @@
         },
         "alembic": {
             "hashes": [
-                "sha256:035ab00497217628bf5d0be82d664d8713ab13d37b630084da8e1f98facf4dbf"
+                "sha256:4e02ed2aa796bd179965041afa092c55b51fb077de19d61835673cc80672c01c",
+                "sha256:5334f32314fb2a56d86b4c4dd1ae34b08c03cae4cb888bc699942104d66bc245"
             ],
             "index": "pypi",
-            "version": "==1.4.2"
+            "version": "==1.4.3"
         },
         "async-timeout": {
             "hashes": [
@@ -75,7 +76,7 @@
                 "sha256:ecd5232cf64f58caac3b85103f1223fdf20e9eb43bfa053c56ef9e5dd76ab099",
                 "sha256:f2d1aa890ffd1ad062a38b7ff7488764b3da4b0a24e0c83d7bbb1d1a6609df15"
             ],
-            "markers": "python_version >= '3.5'",
+            "markers": "python_full_version >= '3.5.0'",
             "version": "==0.21.0"
         },
         "attrs": {
@@ -100,6 +101,14 @@
             ],
             "index": "pypi",
             "version": "==1.4.1"
+        },
+        "disputils": {
+            "hashes": [
+                "sha256:d80c29b68a58cd45660388edd3031dbf92072d1d2e163e2810935687b7547217",
+                "sha256:ea05bac8239e3b8dabfa10db9378c3ccd3b26522d659ec9f386e39edd55be372"
+            ],
+            "index": "pypi",
+            "version": "==0.1.3"
         },
         "gino": {
             "hashes": [
