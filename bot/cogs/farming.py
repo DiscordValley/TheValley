@@ -71,6 +71,7 @@ class Farming(commands.Cog):
 
     @commands.command()
     async def farm(self, ctx):
+        """*Shows your farm*"""
         player = await Player.load(user_id=ctx.author.id, guild_id=ctx.guild.id)
         farm = await Farm.load(player_id=player.id)
         await ctx.send(embed=farm.display())
