@@ -1,4 +1,5 @@
 from bot.database import db
+from bot.utils.constants import PLAYER_BALANCE
 
 
 class Player(db.Model):
@@ -7,7 +8,7 @@ class Player(db.Model):
     id = db.Column(db.BIGINT, primary_key=True)
     user_id = db.Column(db.BIGINT)
     guild_id = db.Column(db.BIGINT)
-    balance = db.Column(db.Integer, default=0)
+    balance = db.Column(db.Integer, default=PLAYER_BALANCE)
     xp = db.Column(db.Integer, default=0)
     level = db.Column(db.Integer, default=1)
 

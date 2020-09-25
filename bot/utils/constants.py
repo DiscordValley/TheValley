@@ -31,3 +31,5 @@ FARM_DIMENSIONS = {
     FarmSizes.MEDIUM: PlotDimensions(rows=5, columns=7),
     FarmSizes.LARGE: PlotDimensions(rows=7, columns=7),
 }
+
+PLAYER_BALANCE = 1000
