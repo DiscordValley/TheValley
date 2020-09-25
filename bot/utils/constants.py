@@ -33,5 +33,7 @@ FARM_DIMENSIONS = {
     FarmSizes.LARGE: PlotDimensions(rows=7, columns=7),
 }
 
+PLAYER_BALANCE = 1000
+
 with open("crop_types.json") as f:
     CROP_DATA = ujson.load(f)
