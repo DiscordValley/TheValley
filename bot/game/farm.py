@@ -1,7 +1,14 @@
 from bot.database.models import Farm as FarmModel
 from bot.database.models import PlantedCrop
 from bot.game.crop import Crop
-from bot.utils.constants import FarmSizes, FARM_DIMENSIONS, PlotCoordinate, PlotActions
+from bot.utils.constants import (
+    FarmSizes,
+    FARM_DIMENSIONS,
+    PlotCoordinate,
+    PlotActions,
+    CROP_DATA,
+)
+from discord import Embed
 from typing import List, Optional
 
 
@@ -60,7 +67,7 @@ class Farm:
             raise ValueError("Crop placement out of bounds")
         self.plot[row][column] = crop
 
-    async def work_plot(self, action: PlotActions, row: int, column: int):
+    async def work_plot(self, action: PlotActions, row: int, column: int, crop_id: int):
         if not self.validate_coordinate(row, column):
             return
         if self.plot[row][column] is not None:
@@ -69,31 +76,55 @@ class Farm:
         else:
             if action is PlotActions.PLANT:
                 self.plot[row][column] = await Crop.new(
-                    farm_id=self.id, crop_id=1, row=row, column=column
-                )  # TODO: Plant kinda needs some crop_id passed doesn't it?
+                    farm_id=self.id, crop_id=crop_id, row=row, column=column
+                )
 
-    async def work_plots(self, action: PlotActions, coordinates: List[PlotCoordinate]):
+    async def work_plots(
+        self,
+        action: PlotActions,
+        coordinates: List[PlotCoordinate],
+        crop_id: int = None,
+    ):
         if not coordinates:
             for row in range(self.dimensions.rows):
                 for column in range(self.dimensions.columns):
-                    await self.work_plot(action=action, row=row, column=column)
+                    await self.work_plot(
+                        action=action, row=row, column=column, crop_id=crop_id
+                    )
 
         for coordinate in coordinates:
             if coordinate.row is None and coordinate.column is not None:
                 for row in range(self.dimensions.rows):
                     await self.work_plot(
-                        action=action, row=row, column=coordinate.column
+                        action=action,
+                        row=row,
+                        column=coordinate.column,
+                        crop_id=crop_id,
                     )
             elif coordinate.column is None and coordinate.row is not None:
                 for column in range(self.dimensions.columns):
                     await self.work_plot(
-                        action=action, row=coordinate.row, column=column
+                        action=action,
+                        row=coordinate.row,
+                        column=column,
+                        crop_id=crop_id,
                     )
             elif coordinate.row and coordinate.column:
                 await self.work_plot(
-                    action=action, row=coordinate.row, column=coordinate.column
+                    action=action,
+                    row=coordinate.row,
+                    column=coordinate.column,
+                    crop_id=crop_id,
                 )
 
     def display(self):
-        # TODO: representation logic
-        return self.plot
+        farm_land = ""
+        for row in self.plot:
+            for crop in row:
+                if crop is None:
+                    farm_land += "<:Crop_Land:753444938791911474>"  # Dirt Emoji
+                    continue
+                farm_land += CROP_DATA[str(crop.crop_id)]["stages"][crop.state]["emote"]
+            farm_land += "\n"
+        embed = Embed(title=self.name, description=farm_land)
+        return embed

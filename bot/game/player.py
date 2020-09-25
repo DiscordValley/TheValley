@@ -1,5 +1,5 @@
 import random
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 
 import ujson
 
@@ -55,6 +55,7 @@ def xp_formula(player_db: PlayerModel, modifier: float):
 @dataclass
 class Player:
     id: int
+    user_id: int
     balance: int
     xp: int
     level: int
@@ -62,17 +63,25 @@ class Player:
 
     @classmethod
     async def load(
-        cls, user_id: int, guild_id: int, db_object: bool = False
+        cls,
+        user_id: int = None,
+        guild_id: int = None,
+        player_obj: PlayerModel = None,
+        db_object: bool = False,
     ) -> Union["Player", Tuple["Player", PlayerModel]]:
-        player_db = (
-            await PlayerModel.query.where(PlayerModel.user_id == user_id)
-            .where(PlayerModel.guild_id == guild_id)
-            .gino.first()
-        )
-        if player_db is None:
-            player_db = await PlayerModel.create(user_id=user_id, guild_id=guild_id)
+        if player_obj:
+            player_db = player_obj
+        else:
+            player_db = (
+                await PlayerModel.query.where(PlayerModel.user_id == user_id)
+                .where(PlayerModel.guild_id == guild_id)
+                .gino.first()
+            )
+            if player_db is None:
+                player_db = await PlayerModel.create(user_id=user_id, guild_id=guild_id)
         player = Player(
             id=player_db.id,
+            user_id=player_db.user_id,
             balance=player_db.balance,
             xp=player_db.xp,
             level=player_db.level,
@@ -82,6 +91,19 @@ class Player:
             return player, player_db
         else:
             return player
+
+    @classmethod
+    async def top(cls, guild_id: int) -> List["Player"]:
+        leaders = (
+            await PlayerModel.query.where(PlayerModel.guild_id == guild_id)
+            .order_by(PlayerModel.xp.desc())
+            .limit(5)
+            .gino.all()
+        )
+        players = list()
+        for leader in leaders:
+            players.append(await Player.load(player_obj=leader))
+        return players
 
     @classmethod
     async def update_xp(cls, user_id, guild_id, modifier) -> Tuple["Player", bool]:

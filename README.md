@@ -1,5 +1,5 @@
-# DiscordValley
-DiscordValley, the farming simulator for Discord! Brought to you by the DV team.
+# The Valley
+The Valley, the farming simulator for Discord! Brought to you by the DV team.
 
 
 # Using docker compose
