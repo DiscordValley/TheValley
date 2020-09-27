@@ -1,3 +1,4 @@
+import math
 import random
 from typing import Tuple, Union, List
 
@@ -8,6 +9,14 @@ from dataclasses import dataclass
 
 with open("levels.json", "r") as f:
     LEVELS = ujson.load(f)
+
+
+def plant_tier_formula(tier: int, modifier: float):
+    return 10 * pow(1.1, tier + 10 - modifier) - abs(2 * math.log(tier * 2) + 15)
+
+
+def plant_stage_formula(stage: int, modifier: float):
+    return 5 * pow(1.1, stage + 10 - modifier) + 8
 
 
 def xp_formula(player_db: PlayerModel, modifier: float):
@@ -139,4 +148,30 @@ class Player:
         return (
             player,
             player_level != og_level,
+        )
+
+    @classmethod
+    async def water_usage(
+        cls, player_level: int, plant_tier: int, plant_stage: int, modifier: float
+    ) -> int:
+        """**Use to calculate water needed for the watering command.**
+
+        USAGE:
+        water_needed = await Player.water_usage(
+            user_id=message.author.id, guild_id=message.guild.id, modifier=0
+        )
+
+        """
+        if player_level == 1:
+            # Prevent issues with doubling water needed at level 1
+            player_level = 2
+        return int(
+            (
+                (
+                    plant_tier_formula(plant_stage, modifier)
+                    + plant_stage_formula(plant_tier, modifier)
+                )
+                / ((player_level / 2) * math.log(player_level) + 10)
+            )
+            * 15
         )
