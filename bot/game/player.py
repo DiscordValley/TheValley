@@ -15,6 +15,16 @@ def level_energy_usage(level: int):
     return 1 / 10 * pow((1 + 1 / 50), level + 40) + 10
 
 
+def energy_increase(player_level: int):
+    if player_level == 1:
+        # Prevent issues with nullification and log(1)
+        player_level = 2
+
+    return abs(
+        level_energy_usage(player_level) * ((player_level / 2) * math.log(player_level))
+    )
+
+
 def plant_tier_formula(tier: int, modifier: float):
     return 10 * pow(1.1, tier + 10 - modifier) - abs(2 * math.log(tier * 2) + 15)
 
@@ -141,13 +151,15 @@ class Player:
         og_level = player_db.level
 
         player_level = 1
+        player_energy = int(player_db.energy)
         for level, xp in LEVELS.items():
             if player_db.xp >= xp:
-                player_level = level
+                player_level = int(level)
+                player_energy = int(player_energy + energy_increase(player_level))
             else:
                 break
 
-        await player_db.update(level=int(player_level)).apply()
+        await player_db.update(level=player_level, energy=player_energy).apply()
 
         return (
             player,
