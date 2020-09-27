@@ -11,6 +11,10 @@ with open("levels.json", "r") as f:
     LEVELS = ujson.load(f)
 
 
+def level_energy_usage(level: int):
+    return 1 / 10 * pow((1 + 1 / 50), level + 40) + 10
+
+
 def plant_tier_formula(tier: int, modifier: float):
     return 10 * pow(1.1, tier + 10 - modifier) - abs(2 * math.log(tier * 2) + 15)
 
@@ -152,13 +156,13 @@ class Player:
 
     @classmethod
     async def water_usage(
-        cls, player_level: int, plant_tier: int, plant_stage: int, modifier: float
+        cls, player_level: int, plant_tier: int, plant_stage: int, modifier: float = 0
     ) -> int:
         """**Use to calculate water needed for the watering command.**
 
         USAGE:
         water_needed = await Player.water_usage(
-            user_id=message.author.id, guild_id=message.guild.id, modifier=0
+            player_level=10, plant_tier=1, plant_stage=1
         )
 
         """
@@ -174,4 +178,37 @@ class Player:
                 / ((player_level / 2) * math.log(player_level) + 10)
             )
             * 15
+        )
+
+    @classmethod
+    async def energy_usage(
+        cls, player_level: int, plant_tier: int, plant_stage: int, modifier: float = 1
+    ) -> int:
+        """**Use to calculate energy needed for any farming command.**
+
+        USAGE:
+        energy_needed = await Player.energy_usage(
+            player_level=10, plant_tier=1, plant_stage=1
+        )
+
+        IMPORTANT: Energy expects a default of 1 for modifier, while water expects a 0. Please do not use modifier
+        unless you need it, otherwise allow for default.
+
+        """
+        if player_level == 1:
+            # Prevent issues with nullification and log(1)
+            player_level = 2
+
+        return int(
+            abs(
+                (
+                    modifier
+                    * (
+                        level_energy_usage(player_level)
+                        + plant_stage_formula(plant_stage, modifier)
+                        + plant_tier_formula(plant_tier, modifier)
+                    )
+                )
+                * ((player_level / 2) * math.log(player_level))
+            )
         )
