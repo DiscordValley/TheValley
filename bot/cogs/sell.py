@@ -32,13 +32,15 @@ class Sell(commands.Cog):
             # sellObj.update(quantity=quantity)
             await ctx.send(itemObj)
             embedSuc = discord.Embed(
-                description='Success! You sold `{}` of `{}`'.format(quantityNum, item),
+                description="Success! You sold `{}` of `{}`".format(quantityNum, item),
             )
             embedSuc.color = COLOR_SUCCESS
             await ctx.send(embed=embedSuc)
         except ValueError:
             embedFail = discord.Embed(
-                description='Please enter a number or full number for quantity. You entered: `{}`'.format(quantity),
+                description="Please enter a number or full number for quantity. You entered: `{}`".format(
+                    quantity
+                ),
             )
             embedFail.color = COLOR_ERROR
             await ctx.send(embed=embedFail)

@@ -94,6 +94,10 @@ class Player:
         else:
             return player
 
+    async def load_inventory(self, full: True):
+        """full: whether or not to load the full item information (name, description etc.)"""
+        pass
+
     @classmethod
     async def top(cls, guild_id: int) -> List["Player"]:
         leaders = (
@@ -108,12 +112,7 @@ class Player:
         return players
 
     @classmethod
-    async def sell(
-            cls,
-            item_id: int,
-            player_id: int,
-            quantity: int
-    ):
+    async def sell(cls, item_id: int, player_id: int, quantity: int):
         selling = (
             await InventoryModel.query.where(InventoryModel.id == player_id)
             .update(quantity)
@@ -124,10 +123,7 @@ class Player:
 
     @classmethod
     async def item(cls, item_id: int):
-        item_query = (
-            await ItemModel.query.where(ItemModel.item_id == item_id)
-            .gino()
-        )
+        item_query = await ItemModel.query.where(ItemModel.item_id == item_id).gino()
 
         return item_query
 
