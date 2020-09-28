@@ -135,3 +135,5 @@ config.json
 
 
 .idea/
+.vim/
+!/discordvalley.code-workspace
