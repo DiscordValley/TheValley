@@ -16,13 +16,14 @@ class InventoryItem:
 
     @classmethod
     async def load(
-        cls, inventory_id: int, item_id: int, quantity: int
+        cls, inventory_id: int, item_id: int, quantity: int, full: True
     ) -> "InventoryItem":
         """Fully load a Inventory item with information from items table"""
         item = InventoryItem(
             inventory_id=inventory_id, item_id=item_id, quantity=quantity
         )
-        await item.fetch()
+        if full:
+            await item.fetch()
         return item
 
     async def fetch(self):
