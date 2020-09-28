@@ -16,7 +16,7 @@ class InventoryItem:
 
     @classmethod
     async def load(
-        cls, inventory_id: int, item_id: int, quantity: int, full: True
+        cls, inventory_id: int, item_id: int, quantity: int, full: bool = True
     ) -> "InventoryItem":
         """Fully load a Inventory item with information from items table"""
         item = InventoryItem(

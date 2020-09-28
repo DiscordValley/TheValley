@@ -10,7 +10,7 @@ class Inventory:
     items: List[InventoryItem]
 
     @classmethod
-    async def load(cls, player_id: int, full: True):
+    async def load(cls, player_id: int, full: bool = True):
         """Load a players Inventory
         optional param: full - also load information for all items"""
         items = await InventoryModel.query.where(
