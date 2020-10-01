@@ -88,7 +88,7 @@ class Store(commands.Cog):
     async def description(self, ctx, *, name: str):
         """*Description of items in store. Use item name.*
         **Example**: `{prefix}store desc Parsnips`"""
-        item_obj = await Item.item(name=name)
+        item_obj = await Item.load(name=name)
         print(item_obj)
         desc_embed = discord.Embed(
             description=f"***Item Name:***  {item_obj.name}\n***Item ID:***  {item_obj.id}\n***Item Description:***  {item_obj.description}\n***Item Cost:***  {item_obj.cost}"

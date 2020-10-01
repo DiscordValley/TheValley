@@ -8,7 +8,7 @@ from bot.database.models import Item as ItemModel
 from bot.database.models import Inventory as InventoryModel
 from dataclasses import dataclass
 
-from bot.utils.errors import ItemNotFoundError
+from bot.utils.errors import ItemNotFoundError, NotAllString
 
 with open("levels.json", "r") as f:
     LEVELS = ujson.load(f)
@@ -118,15 +118,24 @@ class Player:
             .where(InventoryModel.item_id == item_id)
             .gino.first()
         )
-        if isinstance(quantity, str) and quantity.lower() == "all":
-            quantity = inv_obj.quantity
+        if isinstance(quantity, str):
+            if quantity.lower() == "all":
+                quantity = inv_obj.quantity
+            else:
+                raise NotAllString(quantity)
         if isinstance(quantity, int) and inv_obj.quantity < quantity:
             quantity = inv_obj.quantity
 
         return inv_obj, quantity
 
     @classmethod
-    async def sell(cls, player_obj, item_obj, inv_obj, quantity: int):
+    async def sell(
+        cls,
+        player_obj: PlayerModel,
+        item_obj: ItemModel,
+        inv_obj: InventoryModel,
+        quantity: int,
+    ) -> Tuple[int, int]:
 
         sold_price = item_obj.cost * quantity
         new_q = inv_obj.quantity - quantity

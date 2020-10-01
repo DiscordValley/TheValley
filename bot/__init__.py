@@ -51,12 +51,16 @@ async def on_command_error(ctx, error):
     prefix = utils.get_guild_prefix(bot, ctx.guild.id)
     embed = discord.Embed()
     if isinstance(error, commands.MissingRequiredArgument):
-        embed.description = f"⚠️ Missing some required arguments.\nPlease use `{prefix}help` for more info!"
+        embed.description = f"⚠️ Missing some required arguments.\n\nPlease use `{prefix}help` for more info!"
     elif hasattr(error, "original"):
         if isinstance(error.original, utils.errors.ItemNotFoundError):
             embed.description = (
                 f"⚠️ Item `{error.original.item}` not found.\n "
                 f"Please try again with an actual item you twat."
+            )
+        elif isinstance(error.original, utils.errors.NotAllString):
+            embed.description = (
+                f"⚠️ `{error.original.name}` is an invalid argument. Please enter a number or `all`"
             )
         else:
             raise error
