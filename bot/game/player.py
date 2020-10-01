@@ -8,6 +8,8 @@ from bot.database.models import Item as ItemModel
 from bot.database.models import Inventory as InventoryModel
 from dataclasses import dataclass
 
+from bot.utils.errors import ItemNotFoundError
+
 with open("levels.json", "r") as f:
     LEVELS = ujson.load(f)
 
@@ -17,35 +19,35 @@ def xp_formula(player_db: PlayerModel, modifier: float):
         xp = player_db.xp + abs(
             int(
                 (
-                    (
                         (
-                            1
-                            * random.randint(1, 10)
-                            * abs(player_db.level - (player_db.level * 0.4))
-                        )
-                        / (5 * 1)
-                    )
-                    * (
-                        (
-                            pow(
                                 (
-                                    (2 * abs(player_db.level - (player_db.level * 0.4)))
-                                    + 10
-                                ),
-                                2.5,
-                            )
-                            / pow(
-                                (
-                                    abs(player_db.level - (player_db.level * 0.4))
-                                    + player_db.level
-                                    + 10
-                                ),
-                                2.5,
-                            )
+                                        1
+                                        * random.randint(1, 10)
+                                        * abs(player_db.level - (player_db.level * 0.4))
+                                )
+                                / (5 * 1)
                         )
-                        + 1
-                    )
-                    * modifier
+                        * (
+                                (
+                                        pow(
+                                            (
+                                                    (2 * abs(player_db.level - (player_db.level * 0.4)))
+                                                    + 10
+                                            ),
+                                            2.5,
+                                        )
+                                        / pow(
+                                    (
+                                            abs(player_db.level - (player_db.level * 0.4))
+                                            + player_db.level
+                                            + 10
+                                    ),
+                                    2.5,
+                                )
+                                )
+                                + 1
+                        )
+                        * modifier
                 )
             )
         )
@@ -65,19 +67,19 @@ class Player:
 
     @classmethod
     async def load(
-        cls,
-        user_id: int = None,
-        guild_id: int = None,
-        player_obj: PlayerModel = None,
-        db_object: bool = False,
+            cls,
+            user_id: int = None,
+            guild_id: int = None,
+            player_obj: PlayerModel = None,
+            db_object: bool = False,
     ) -> Union["Player", Tuple["Player", PlayerModel]]:
         if player_obj:
             player_db = player_obj
         else:
             player_db = (
                 await PlayerModel.query.where(PlayerModel.user_id == user_id)
-                .where(PlayerModel.guild_id == guild_id)
-                .gino.first()
+                    .where(PlayerModel.guild_id == guild_id)
+                    .gino.first()
             )
             if player_db is None:
                 player_db = await PlayerModel.create(user_id=user_id, guild_id=guild_id)
@@ -98,9 +100,9 @@ class Player:
     async def top(cls, guild_id: int) -> List["Player"]:
         leaders = (
             await PlayerModel.query.where(PlayerModel.guild_id == guild_id)
-            .order_by(PlayerModel.xp.desc())
-            .limit(5)
-            .gino.all()
+                .order_by(PlayerModel.xp.desc())
+                .limit(5)
+                .gino.all()
         )
         players = list()
         for leader in leaders:
@@ -108,28 +110,39 @@ class Player:
         return players
 
     @classmethod
-    async def sell(
-            cls,
-            item_id: int,
-            player_id: int,
-            quantity: int
-    ):
-        selling = (
-            await InventoryModel.query.where(InventoryModel.id == player_id)
-            .update(quantity)
-            .where(item_id=item_id)
+    async def validate_sell(cls, player_id: int, item_id: int, quantity: Union[int, str]) -> Tuple[InventoryModel, int]:
+        inv_obj = (
+            await InventoryModel.query.where(InventoryModel.player_id == player_id).where(InventoryModel.item_id == item_id).gino.first()
         )
+        if isinstance(quantity, str) and quantity.lower() == "all":
+            quantity = inv_obj.quantity
+        if isinstance(quantity, int) and inv_obj.quantity < quantity:
+            quantity = inv_obj.quantity
 
-        return selling
+        return inv_obj, quantity
 
     @classmethod
-    async def item(cls, item_id: int):
-        item_query = (
-            await ItemModel.query.where(ItemModel.item_id == item_id)
-            .gino()
-        )
+    async def sell(
+            cls,
+            player_obj,
+            item_obj,
+            inv_obj,
+            quantity: int
+    ):
 
-        return item_query
+        sold_price = item_obj.cost * quantity
+        new_q = inv_obj.quantity - quantity
+        curr_bal = player_obj.balance
+        new_bal = sold_price + curr_bal
+
+        if new_q == 0:
+            await inv_obj.delete()
+        else:
+            await inv_obj.update(quantity=new_q).apply()
+
+        await player_obj.update(balance=new_bal).apply()
+
+        return sold_price, new_bal
 
     @classmethod
     async def update_xp(cls, user_id, guild_id, modifier) -> Tuple["Player", bool]:

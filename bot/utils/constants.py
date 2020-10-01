@@ -41,5 +41,5 @@ FARM_DIMENSIONS = {
 }
 
 COLOR_ERROR = discord.Color.red()
-
 COLOR_SUCCESS = discord.Color.green()
+COLOR_INFO = discord.Color.gold()
