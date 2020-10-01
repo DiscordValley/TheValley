@@ -21,6 +21,6 @@ Distributed under the GNU Public License (GPLv3) (See accompanying file LICENSE)
 
 ### Support:
 
-The best way to support The Valley is to contribute! Feel free to make PRs, open issues, and help us make this the best bot we can! If interested, supporting us through 
+The best way to support The Valley is to contribute! Feel free to make PRs, open issues, and help us make this the best bot we can! If interested, supporting us through Github Sponsors would be appreciated.
 
 Keywords: python, discord, gino, postgresql
