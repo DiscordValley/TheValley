@@ -87,12 +87,12 @@ class Store(commands.Cog):
     @store.command(aliases=["details", "info", "desc"])
     async def description(self, ctx, *, name: str):
         """*Description of items in store. Use item name.*
-                **Example**: `{prefix}store desc Parsnips`"""
+        **Example**: `{prefix}store desc Parsnips`"""
         item_obj = await Item.item(name=name)
         print(item_obj)
         desc_embed = discord.Embed(
-            description=f'***Item Name:***  {item_obj.name}\n***Item ID:***  {item_obj.id}\n***Item Description:***  {item_obj.description}\n***Item Cost:***  {item_obj.cost}'
-                        f'\n***Item Creation ID:***  {item_obj.creation_id}'
+            description=f"***Item Name:***  {item_obj.name}\n***Item ID:***  {item_obj.id}\n***Item Description:***  {item_obj.description}\n***Item Cost:***  {item_obj.cost}"
+            f"\n***Item Creation ID:***  {item_obj.creation_id}"
         )
         desc_embed.color = COLOR_INFO
         await ctx.send(embed=desc_embed)
@@ -101,18 +101,22 @@ class Store(commands.Cog):
     async def sell(self, ctx, name: str, quantity: Union[int, str]):
         if isinstance(quantity, int) and quantity <= 0:
             embed_fail = discord.Embed(
-                description=f'Please enter a number or full number for quantity. You entered: `{quantity}`',
+                description=f"Please enter a number or full number for quantity. You entered: `{quantity}`",
             )
             embed_fail.color = COLOR_ERROR
             await ctx.send(embed=embed_fail)
             return
 
-        player, player_obj = await Player.load(user_id=ctx.author.id, guild_id=ctx.guild.id, db_object=True)
+        player, player_obj = await Player.load(
+            user_id=ctx.author.id, guild_id=ctx.guild.id, db_object=True
+        )
         item_obj = await Item.load(name=name)
-        inv_obj, quantity = await Player.validate_sell(item_id=item_obj.id, player_id=player.id, quantity=quantity)
+        inv_obj, quantity = await Player.validate_sell(
+            item_id=item_obj.id, player_id=player.id, quantity=quantity
+        )
         if inv_obj is None:
             embed_fail = discord.Embed(
-                description=f'Item not found in inventory. Enter an item that you have in your inventory.: `{name}`',
+                description=f"Item not found in inventory. Enter an item that you have in your inventory.: `{name}`",
             )
             embed_fail.color = COLOR_ERROR
             await ctx.send(embed=embed_fail)
@@ -120,17 +124,22 @@ class Store(commands.Cog):
         if inv_obj.quantity == quantity:
             confirmation = BotConfirmation(ctx, COLOR_INFO)
             await confirmation.confirm(
-                f'You are trying to sell all of your item: `{item_obj.name}`. Are you sure?')
+                f"You are trying to sell all of your item: `{item_obj.name}`. Are you sure?"
+            )
 
             if confirmation.confirmed:
                 await confirmation.update("Confirmed", color=COLOR_SUCCESS)
             else:
-                await confirmation.update("Not confirmed, sale aborted.", hide_author=True, color=COLOR_ERROR)
+                await confirmation.update(
+                    "Not confirmed, sale aborted.", hide_author=True, color=COLOR_ERROR
+                )
                 return
-        price, balance = await Player.sell(player_obj=player_obj, item_obj=item_obj, inv_obj=inv_obj, quantity=quantity)
+        price, balance = await Player.sell(
+            player_obj=player_obj, item_obj=item_obj, inv_obj=inv_obj, quantity=quantity
+        )
         embed_suc = discord.Embed(
-            description=f'Success! You sold `{quantity}` of `{item_obj.name}` for `{price}`. \n\n'
-                        f'You now have a total of `{balance}` coins'
+            description=f"Success! You sold `{quantity}` of `{item_obj.name}` for `{price}`. \n\n"
+            f"You now have a total of `{balance}` coins"
         )
         embed_suc.color = COLOR_SUCCESS
         await ctx.send(embed=embed_suc)
