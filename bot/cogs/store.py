@@ -6,7 +6,7 @@ import json
 from discord.ext import commands
 from disputils import BotEmbedPaginator, BotConfirmation
 
-from bot.game import Player, Item
+from bot.game import Player, InventoryItem
 
 from bot.utils.constants import COLOR_ERROR, COLOR_SUCCESS, COLOR_INFO
 
@@ -88,7 +88,7 @@ class Store(commands.Cog):
     async def description(self, ctx, *, name: str):
         """*Description of items in store. Use item name.*
         **Example**: `{prefix}store desc Parsnips`"""
-        item_obj = await Item.load(name=name)
+        item_obj = await InventoryItem.find(name=name)
         print(item_obj)
         desc_embed = discord.Embed(
             description=f"***Item Name:***  {item_obj.name}\n***Item ID:***  {item_obj.id}\n***Item Description:***  {item_obj.description}\n***Item Cost:***  {item_obj.cost}"
@@ -110,7 +110,7 @@ class Store(commands.Cog):
         player, player_obj = await Player.load(
             user_id=ctx.author.id, guild_id=ctx.guild.id, db_object=True
         )
-        item_obj = await Item.load(name=name)
+        item_obj = await InventoryItem.find(name=name)
         inv_obj, quantity = await Player.validate_sell(
             item_id=item_obj.id, player_id=player.id, quantity=quantity
         )

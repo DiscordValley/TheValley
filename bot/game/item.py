@@ -1,7 +1,9 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Tuple
 
 from bot.database.models.items import Item as ItemModel
+from bot.database.models.inventory import Inventory as InventoryModel
+from bot.utils.errors import ItemNotFoundError
 
 
 @dataclass
@@ -25,6 +27,14 @@ class InventoryItem:
         if full:
             await item.fetch()
         return item
+
+    @classmethod
+    async def find(cls, name: str) -> ItemModel:
+        item = await ItemModel.query.where(ItemModel.name == name).gino.first()
+        if item is None:
+            raise ItemNotFoundError(name)
+        return item
+
 
     async def fetch(self):
         """Fetch information from items table if not previously loaded"""
