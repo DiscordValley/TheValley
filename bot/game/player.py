@@ -9,6 +9,8 @@ from bot.database.models import Inventory as InventoryModel
 from bot.game.inventory import Inventory
 from dataclasses import dataclass
 
+from bot.utils.errors import ItemNotFoundError, NotAllString
+
 with open("levels.json", "r") as f:
     LEVELS = ujson.load(f)
 
@@ -129,20 +131,46 @@ class Player:
         return players
 
     @classmethod
-    async def sell(cls, item_id: int, player_id: int, quantity: int):
-        selling = (
-            await InventoryModel.query.where(InventoryModel.id == player_id)
-            .update(quantity)
-            .where(item_id=item_id)
+    async def validate_sell(
+        cls, player_id: int, item_id: int, quantity: Union[int, str]
+    ) -> Tuple[InventoryModel, int]:
+        inv_obj = (
+            await InventoryModel.query.where(InventoryModel.player_id == player_id)
+            .where(InventoryModel.item_id == item_id)
+            .gino.first()
         )
+        if isinstance(quantity, str):
+            if quantity.lower() == "all":
+                quantity = inv_obj.quantity
+            else:
+                raise NotAllString(quantity)
+        if isinstance(quantity, int) and inv_obj.quantity < quantity:
+            quantity = inv_obj.quantity
 
-        return selling
+        return inv_obj, quantity
 
     @classmethod
-    async def item(cls, item_id: int):
-        item_query = await ItemModel.query.where(ItemModel.item_id == item_id).gino()
+    async def sell(
+        cls,
+        player_obj: PlayerModel,
+        item_obj: ItemModel,
+        inv_obj: InventoryModel,
+        quantity: int,
+    ) -> Tuple[int, int]:
 
-        return item_query
+        sold_price = item_obj.cost * quantity
+        new_q = inv_obj.quantity - quantity
+        curr_bal = player_obj.balance
+        new_bal = sold_price + curr_bal
+
+        if new_q == 0:
+            await inv_obj.delete()
+        else:
+            await inv_obj.update(quantity=new_q).apply()
+
+        await player_obj.update(balance=new_bal).apply()
+
+        return sold_price, new_bal
 
     @classmethod
     async def update_xp(cls, user_id, guild_id, modifier) -> Tuple["Player", bool]:

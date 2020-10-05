@@ -8,4 +8,4 @@ class Item(db.Model):
     name = db.Column(db.Text, unique=True)
     description = db.Column(db.Text)
     cost = db.Column(db.Integer)
-    creation_id = db.Column(db.Integer)
+    creation_id = db.Column(db.BIGINT)

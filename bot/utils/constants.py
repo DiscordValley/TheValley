@@ -47,5 +47,5 @@ with open("crop_types.json") as f:
     CROP_DATA = ujson.load(f)
 
 COLOR_ERROR = discord.Color.red()
-
 COLOR_SUCCESS = discord.Color.green()
+COLOR_INFO = discord.Color.gold()
