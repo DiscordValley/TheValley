@@ -1,32 +1,47 @@
-from typing import Union, Tuple
-
-from bot.database.models import Item as ItemModel
 from dataclasses import dataclass
+from typing import Optional, Tuple
 
+from bot.database.models.items import Item as ItemModel
+from bot.database.models.inventory import Inventory as InventoryModel
 from bot.utils.errors import ItemNotFoundError
 
 
 @dataclass
-class Item:
-    id: int
-    name: str
-    description: str
-    cost: int
-    creation_id: int
+class InventoryItem:
+    inventory_id: int
+    item_id: int
+    quantity: int
+    name: Optional[str] = None
+    description: Optional[str] = None
+    cost: Optional[int] = None
+    creation_id: Optional[int] = None
 
     @classmethod
     async def load(
-        cls,
-        id: int = None,
-        name: str = None,
-        description: str = None,
-        cost: int = None,
-        creation_id: int = None,
-        db_object: bool = False,
-    ) -> Union["Item", Tuple["Item", ItemModel]]:
-        item_obj = await ItemModel.query.where(ItemModel.name == name).gino.first()
+        cls, inventory_id: int, item_id: int, quantity: int, full: bool = True
+    ) -> "InventoryItem":
+        """Fully load a Inventory item with information from items table"""
+        item = InventoryItem(
+            inventory_id=inventory_id, item_id=item_id, quantity=quantity
+        )
+        if full:
+            await item.fetch()
+        return item
 
-        if item_obj is None:
+    @classmethod
+    async def find(cls, name: str) -> ItemModel:
+        item = await ItemModel.query.where(ItemModel.name == name).gino.first()
+        if item is None:
             raise ItemNotFoundError(name)
+        return item
 
-        return item_obj
+
+    async def fetch(self):
+        """Fetch information from items table if not previously loaded"""
+        item = await ItemModel.get(self.item_id)
+        if not item:
+            raise ValueError(f"Item with id {self.item_id} not found in database.")
+        self.name = item.name
+        self.description = item.description
+        self.cost = item.cost
+        self.creation_id = item.creation_id
