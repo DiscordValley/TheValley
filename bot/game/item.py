@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional
 
 from bot.database.models.items import Item as ItemModel
-from bot.database.models.inventory import Inventory as InventoryModel
 from bot.utils.errors import ItemNotFoundError
 
 
@@ -34,7 +33,6 @@ class InventoryItem:
         if item is None:
             raise ItemNotFoundError(name)
         return item
-
 
     async def fetch(self):
         """Fetch information from items table if not previously loaded"""
