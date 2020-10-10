@@ -24,9 +24,9 @@ class Profile(commands.Cog):
             "your account.",
         )
         embed.add_field(name="Farm Name", value=farm.name)
-        embed.add_field(name="Balance", value=player.balance)
-        embed.add_field(name="XP", value=player.xp)
-        embed.add_field(name="Level", value=player.level)
+        embed.add_field(name="Balance", value=str(player.balance))
+        embed.add_field(name="XP", value=str(player.xp))
+        embed.add_field(name="Level", value=str(player.level))
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -36,7 +36,7 @@ class Profile(commands.Cog):
         )
         embed = discord.Embed(title="Inventory")
         embed.set_footer(text=f"Inventory of {ctx.author}")
-        for item in player.inventory.items:
+        for item in player.inventory.items.values():
             embed.add_field(name=item.name.capitalize(), value=str(item.quantity))
 
         await ctx.send(embed=embed)
