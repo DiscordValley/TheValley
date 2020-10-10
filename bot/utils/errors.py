@@ -3,6 +3,6 @@ class ItemNotFoundError(Exception):
         self.item = item
 
 
-class NotAllString(Exception):
+class InvalidQuantityError(Exception):
     def __init__(self, name: str):
         self.name = name

@@ -1,15 +1,14 @@
 import random
+from dataclasses import dataclass
 from typing import Tuple, Union, List, Optional
 
 import ujson
 
-from bot.database.models import Player as PlayerModel
-from bot.database.models import Item as ItemModel
 from bot.database.models import Inventory as InventoryModel
+from bot.database.models import Item as ItemModel
+from bot.database.models import Player as PlayerModel
 from bot.game.inventory import Inventory
-from dataclasses import dataclass
-
-from bot.utils.errors import ItemNotFoundError, NotAllString
+from bot.utils.errors import InvalidQuantityError
 
 with open("levels.json", "r") as f:
     LEVELS = ujson.load(f)
@@ -143,7 +142,7 @@ class Player:
             if quantity.lower() == "all":
                 quantity = inv_obj.quantity
             else:
-                raise NotAllString(quantity)
+                raise InvalidQuantityError(quantity)
         if isinstance(quantity, int) and inv_obj.quantity < quantity:
             quantity = inv_obj.quantity
 
