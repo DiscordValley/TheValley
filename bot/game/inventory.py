@@ -59,7 +59,8 @@ class Inventory:
             if inv_obj.quantity == quantity:
                 await inv_obj.delete()
             else:
-                await inv_obj.update(quantity=(inv_obj.quantity - quantity))
+                await inv_obj.update(quantity=(inv_obj.quantity - quantity)).apply()
+        await self.reload_items()
 
     async def add_item(self, item_id: int, quantity: int = 1):
         item = self.get_item(item_id)
@@ -70,6 +71,7 @@ class Inventory:
         else:
             inv_obj = await self.get_inventory_object(item.inventory_id)
             await inv_obj.update(quantity=inv_obj.quantity + quantity)
+        await self.reload_items()
 
     async def fetch(self):
         """Fetch information about inventory items if not previously loaded"""

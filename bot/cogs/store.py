@@ -107,24 +107,23 @@ class Store(commands.Cog):
             await ctx.send(embed=embed_fail)
             return
 
-        player, player_obj = await Player.load(
-            user_id=ctx.author.id, guild_id=ctx.guild.id, db_object=True
+        player = await Player.load(
+            user_id=ctx.author.id, guild_id=ctx.guild.id, load_inventory=True
         )
-        item_obj = await InventoryItem.find(name=name)
-        inv_obj, quantity = await Player.validate_sell(
-            item_id=item_obj.id, player_id=player.id, quantity=quantity
-        )
-        if inv_obj is None:
+        item = player.inventory.find_item(item_name=name)
+        if item is None:
             embed_fail = discord.Embed(
                 description=f"Item not found in inventory. Enter an item that you have in your inventory.: `{name}`",
             )
             embed_fail.color = COLOR_ERROR
             await ctx.send(embed=embed_fail)
             return
-        if inv_obj.quantity == quantity:
+
+        quantity = await player.validate_sell(item_id=item.item_id, quantity=quantity)
+        if item.quantity == quantity:
             confirmation = BotConfirmation(ctx, COLOR_INFO)
             await confirmation.confirm(
-                f"You are trying to sell all of your item: `{item_obj.name}`. Are you sure?"
+                f"You are trying to sell all of your item: `{item.name}`. Are you sure?"
             )
 
             if confirmation.confirmed:
@@ -134,11 +133,9 @@ class Store(commands.Cog):
                     "Not confirmed, sale aborted.", hide_author=True, color=COLOR_ERROR
                 )
                 return
-        price, balance = await Player.sell(
-            player_obj=player_obj, item_obj=item_obj, inv_obj=inv_obj, quantity=quantity
-        )
+        price, balance = await player.sell(item=item, quantity=quantity)
         embed_suc = discord.Embed(
-            description=f"Success! You sold `{quantity}` of `{item_obj.name}` for `{price}`. \n\n"
+            description=f"Success! You sold `{quantity}` of `{item.name}` for `{price}`. \n\n"
             f"You now have a total of `{balance}` coins"
         )
         embed_suc.color = COLOR_SUCCESS

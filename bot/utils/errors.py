@@ -13,3 +13,9 @@ class InsufficientQuantityError(Exception):
         self.name = name
         self.current_quantity = current_quantity
         self.remove_quantity = remove_quantity
+
+
+class InsufficientFundsError(Exception):
+    def __init__(self, balance: int, amount: int):
+        self.balance = balance
+        self.amount = amount
