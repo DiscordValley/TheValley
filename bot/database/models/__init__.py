@@ -4,4 +4,4 @@ from .planted_crops import PlantedCrop  # noqa
 from .players import Player  # noqa
 from .profiles import Profile  # noqa
 from .items import Item  # noqa
-from .inventories import Inventory
+from .inventories import Inventory  # noqa

@@ -58,7 +58,7 @@ async def on_command_error(ctx, error):
                 f"⚠️ Item `{error.original.item}` not found.\n "
                 f"Please try again with an actual item you twat."
             )
-        elif isinstance(error.original, utils.errors.NotAllString):
+        elif isinstance(error.original, utils.errors.InvalidQuantityError):
             embed.description = f"⚠️ `{error.original.name}` is an invalid argument. Please enter a number or `all`"
         else:
             raise error

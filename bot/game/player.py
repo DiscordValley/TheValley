@@ -1,15 +1,15 @@
 import random
+from dataclasses import dataclass
 from typing import Tuple, Union, List, Optional
 
 import ujson
 
+# from bot.database.models import Inventory as InventoryModel
+# from bot.database.models import Item as ItemModel
 from bot.database.models import Player as PlayerModel
-from bot.database.models import Item as ItemModel
-from bot.database.models import Inventory as InventoryModel
 from bot.game.inventory import Inventory
-from dataclasses import dataclass
-
-from bot.utils.errors import ItemNotFoundError, NotAllString
+from bot.game.item import InventoryItem
+from bot.utils.errors import InvalidQuantityError, InsufficientFundsError
 
 with open("levels.json", "r") as f:
     LEVELS = ujson.load(f)
@@ -65,6 +65,7 @@ class Player:
     xp: int
     level: int
     energy: int
+    db_object: PlayerModel
     inventory: Optional[Inventory] = None
 
     @classmethod
@@ -105,6 +106,7 @@ class Player:
             xp=player_db.xp,
             level=player_db.level,
             energy=player_db.energy,
+            db_object=player_db,
         )
         if load_inventory:
             await player.load_inventory(full=load_inventory_fully)
@@ -130,47 +132,42 @@ class Player:
             players.append(await Player.load(player_obj=leader))
         return players
 
-    @classmethod
-    async def validate_sell(
-        cls, player_id: int, item_id: int, quantity: Union[int, str]
-    ) -> Tuple[InventoryModel, int]:
-        inv_obj = (
-            await InventoryModel.query.where(InventoryModel.player_id == player_id)
-            .where(InventoryModel.item_id == item_id)
-            .gino.first()
-        )
+    async def validate_sell(self, item_id: int, quantity: Union[int, str]) -> int:
+        if not self.inventory:
+            await self.load_inventory(full=True)
+        item = self.inventory.get_item(item_id)
         if isinstance(quantity, str):
             if quantity.lower() == "all":
-                quantity = inv_obj.quantity
+                quantity = item.quantity
             else:
-                raise NotAllString(quantity)
-        if isinstance(quantity, int) and inv_obj.quantity < quantity:
-            quantity = inv_obj.quantity
+                raise InvalidQuantityError(quantity)
+        if isinstance(quantity, int) and item.quantity < quantity:
+            quantity = item.quantity
 
-        return inv_obj, quantity
+        return quantity
 
-    @classmethod
     async def sell(
-        cls,
-        player_obj: PlayerModel,
-        item_obj: ItemModel,
-        inv_obj: InventoryModel,
+        self,
+        item: InventoryItem,
         quantity: int,
     ) -> Tuple[int, int]:
 
-        sold_price = item_obj.cost * quantity
-        new_q = inv_obj.quantity - quantity
-        curr_bal = player_obj.balance
-        new_bal = sold_price + curr_bal
+        sold_price = item.cost * quantity
+        await self.inventory.remove_item(item.item_id, quantity)
+        await self.add_balance(sold_price)
+        return sold_price, self.balance
 
-        if new_q == 0:
-            await inv_obj.delete()
-        else:
-            await inv_obj.update(quantity=new_q).apply()
+    async def add_balance(self, amount: int):
+        new_balance = self.balance + amount
+        await self.db_object.update(balance=new_balance).apply()
+        self.balance = new_balance
 
-        await player_obj.update(balance=new_bal).apply()
-
-        return sold_price, new_bal
+    async def remove_balance(self, amount: int):
+        if self.balance < amount:
+            raise InsufficientFundsError(balance=self.balance, amount=amount)
+        new_balance = self.balance - amount
+        await self.db_object.update(balance=new_balance).apply()
+        self.balance = new_balance
 
     @classmethod
     async def update_xp(cls, user_id, guild_id, modifier) -> Tuple["Player", bool]:
