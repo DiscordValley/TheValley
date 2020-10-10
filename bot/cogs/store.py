@@ -92,18 +92,21 @@ class Store(commands.Cog):
         print(item_obj)
         desc_embed = discord.Embed(
             description=f"***Item Name:***  {item_obj.name}\n***Item ID:***  {item_obj.id}\n***Item Description:***  {item_obj.description}\n***Item Cost:***  {item_obj.cost}"
-            f"\n***Item Creation ID:***  {item_obj.creation_id}"
+            f"\n***Item Creation ID:***  {item_obj.creation_id}",
+            color=COLOR_INFO,
         )
-        desc_embed.color = COLOR_INFO
         await ctx.send(embed=desc_embed)
 
     @store.command()
     async def sell(self, ctx, name: str, quantity: Union[int, str]):
+        """*Sell items*.
+
+        **Example**: `{prefix}store sell pickle 10`"""
         if isinstance(quantity, int) and quantity <= 0:
             embed_fail = discord.Embed(
                 description=f"Please enter a number or full number for quantity. You entered: `{quantity}`",
+                color=COLOR_ERROR,
             )
-            embed_fail.color = COLOR_ERROR
             await ctx.send(embed=embed_fail)
             return
 
@@ -114,8 +117,8 @@ class Store(commands.Cog):
         if item is None:
             embed_fail = discord.Embed(
                 description=f"Item not found in inventory. Enter an item that you have in your inventory.: `{name}`",
+                color=COLOR_ERROR,
             )
-            embed_fail.color = COLOR_ERROR
             await ctx.send(embed=embed_fail)
             return
 
@@ -136,16 +139,40 @@ class Store(commands.Cog):
         price, balance = await player.sell(item=item, quantity=quantity)
         embed_suc = discord.Embed(
             description=f"Success! You sold `{quantity}` of `{item.name}` for `{price}`. \n\n"
-            f"You now have a total of `{balance}` coins"
+            f"You now have a total of `{balance}` coins",
+            color=COLOR_SUCCESS,
         )
-        embed_suc.color = COLOR_SUCCESS
         await ctx.send(embed=embed_suc)
 
     @store.command()
     async def buy(self, ctx, name: str, quantity: int):
-        player = await Player.load(user_id=ctx.author.id, guild_id=ctx.guild.id)
+        """*Buy items*.
 
-        return
+        **Example**: `{prefix}store buy pickle 10`"""
+        player = await Player.load(
+            user_id=ctx.author.id, guild_id=ctx.guild.id, load_inventory=True
+        )
+        item_obj = await InventoryItem.find(name=name)
+        price = item_obj.cost * quantity
+
+        if price > player.balance:
+            embed = discord.Embed(
+                description=f"Insufficient funds to buy `{quantity}` of `{name.capitalize()}`.\n"
+                f"Would cost `{price}` current balance `{player.balance}`.",
+                color=COLOR_ERROR,
+            )
+            await ctx.send(embed=embed)
+            return
+
+        await player.inventory.add_item(item_id=item_obj.id, quantity=quantity)
+        await player.remove_balance(amount=price)
+
+        embed = discord.Embed(
+            description=f"Success! You bought `{quantity}` of `{name.capitalize()}` for `{price}`. \n\n"
+            f"You now have a total of `{player.balance}` coins left.",
+            color=COLOR_SUCCESS,
+        )
+        await ctx.send(embed=embed)
 
 
 def setup(bot):

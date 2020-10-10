@@ -70,7 +70,7 @@ class Inventory:
             )
         else:
             inv_obj = await self.get_inventory_object(item.inventory_id)
-            await inv_obj.update(quantity=inv_obj.quantity + quantity)
+            await inv_obj.update(quantity=inv_obj.quantity + quantity).apply()
         await self.reload_items()
 
     async def fetch(self):
