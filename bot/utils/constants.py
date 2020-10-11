@@ -2,8 +2,16 @@ from enum import Enum
 from dataclasses import dataclass
 import ujson
 
+import discord
+
 
 class FarmSizes(Enum):
+    SMALL = 0
+    MEDIUM = 1
+    LARGE = 2
+
+
+class InventorySizes(Enum):
     SMALL = 0
     MEDIUM = 1
     LARGE = 2
@@ -37,3 +45,7 @@ PLAYER_BALANCE = 1000
 
 with open("crop_types.json") as f:
     CROP_DATA = ujson.load(f)
+
+COLOR_ERROR = discord.Color.red()
+COLOR_SUCCESS = discord.Color.green()
+COLOR_INFO = discord.Color.gold()

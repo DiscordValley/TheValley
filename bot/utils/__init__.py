@@ -1,4 +1,5 @@
 from .config import Config
+from . import errors
 
 config = Config()
 
