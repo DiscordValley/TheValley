@@ -1,3 +1,15 @@
+import math
+from typing import Tuple, Union, List
+
+from bot.database.models import Player as PlayerModel
+from dataclasses import dataclass
+from bot.utils.formulas import (
+    level_energy_usage,
+    energy_increase,
+    plant_tier_formula,
+    plant_stage_formula,
+    xp_formula,
+)
 import random
 from dataclasses import dataclass
 from typing import Tuple, Union, List, Optional
@@ -192,15 +204,76 @@ class Player:
         og_level = player_db.level
 
         player_level = 1
+        player_energy = int(player_db.energy)
         for level, xp in LEVELS.items():
             if player_db.xp >= xp:
-                player_level = level
+                player_level = int(level)
+                player_energy = int(player_energy + energy_increase(player_level))
             else:
                 break
 
-        await player_db.update(level=int(player_level)).apply()
+        await player_db.update(level=player_level, energy=player_energy).apply()
 
         return (
             player,
             player_level != og_level,
+        )
+
+    @classmethod
+    async def water_usage(
+        cls, player_level: int, plant_tier: int, plant_stage: int, modifier: float = 0
+    ) -> int:
+        """**Use to calculate water needed for the watering command.**
+
+        USAGE:
+        water_needed = await Player.water_usage(
+            player_level=10, plant_tier=1, plant_stage=1
+        )
+
+        """
+        if player_level == 1:
+            # Prevent issues with doubling water needed at level 1
+            player_level = 2
+        return int(
+            (
+                (
+                    plant_tier_formula(plant_stage, modifier)
+                    + plant_stage_formula(plant_tier, modifier)
+                )
+                / ((player_level / 2) * math.log(player_level) + 10)
+            )
+            * 15
+        )
+
+    @classmethod
+    async def energy_usage(
+        cls, player_level: int, plant_tier: int, plant_stage: int, modifier: float = 1
+    ) -> int:
+        """**Use to calculate energy needed for any farming command.**
+
+        USAGE:
+        energy_needed = await Player.energy_usage(
+            player_level=10, plant_tier=1, plant_stage=1
+        )
+
+        IMPORTANT: Energy expects a default of 1 for modifier, while water expects a 0. Please do not use modifier
+        unless you need it, otherwise allow for default.
+
+        """
+        if player_level == 1:
+            # Prevent issues with nullification and log(1)
+            player_level = 2
+
+        return int(
+            abs(
+                (
+                    modifier
+                    * (
+                        level_energy_usage(player_level)
+                        + plant_stage_formula(plant_stage, modifier)
+                        + plant_tier_formula(plant_tier, modifier)
+                    )
+                )
+                * ((player_level / 2) * math.log(player_level))
+            )
         )
