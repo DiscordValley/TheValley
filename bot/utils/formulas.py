@@ -1,5 +1,9 @@
 import ujson
+import random
 import math
+
+from bot.game.player import PlayerModel
+
 
 with open("levels.json", "r") as f:
     LEVELS = ujson.load(f)
