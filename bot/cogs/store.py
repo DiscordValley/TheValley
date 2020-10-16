@@ -116,7 +116,7 @@ class Store(commands.Cog):
         item = player.inventory.find_item(item_name=name)
         if item is None:
             embed_fail = discord.Embed(
-                description=f"Item not found in inventory. Enter an item that you have in your inventory.: `{name}`",
+                description=f"Item `{name}` not found in inventory. Enter an item that you have in your inventory.",
                 color=COLOR_ERROR,
             )
             await ctx.send(embed=embed_fail)

@@ -17,16 +17,18 @@ class Profile(commands.Cog):
         **Example**: `{prefix}profile`"""
         player = await Player.load(user_id=ctx.author.id, guild_id=ctx.guild.id)
         farm = await Farm.load(player_id=player.id)
+        description = ""
+        farm_name = farm.name
+        if farm.name is None:
+            farm_name = f"{ctx.author.display_name}'s Farm"
+        description += f"\n👨‍🌾 **Farm Name:** {farm_name}\n\n **💰 Balance:** {player.balance} \n\n 📊 **Experience:** {player.xp} \n\n 🎚 **Level:** ️{player.level}"
+
         embed = discord.Embed(
-            title="Your Valley Profile",
-            description="This command will show you where you are in "
-            "terms of ranking, and other information about "
-            "your account.",
+            color=0x336633,
+            title=f"{ctx.author.display_name}'s Valley Profile",
+            description=description,
         )
-        embed.add_field(name="Farm Name", value=farm.name)
-        embed.add_field(name="Balance", value=str(player.balance))
-        embed.add_field(name="XP", value=str(player.xp))
-        embed.add_field(name="Level", value=str(player.level))
+        embed.set_thumbnail(url=ctx.author.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command()
