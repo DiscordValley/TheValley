@@ -20,12 +20,12 @@ class Profile(commands.Cog):
         description = ""
         farm_name = farm.name
         if farm.name is None:
-            farm_name = f'{ctx.author.display_name}\'s Farm'
-        description += f'\n👨‍🌾 **Farm Name:** {farm_name}\n\n **💰 Balance:** {player.balance} \n\n 📊 **Experience:** {player.xp} \n\n 🎚 **Level:** ️{player.level}'
+            farm_name = f"{ctx.author.display_name}'s Farm"
+        description += f"\n👨‍🌾 **Farm Name:** {farm_name}\n\n **💰 Balance:** {player.balance} \n\n 📊 **Experience:** {player.xp} \n\n 🎚 **Level:** ️{player.level}"
 
         embed = discord.Embed(
             color=0x336633,
-            title=f'{ctx.author.display_name}\'s Valley Profile',
+            title=f"{ctx.author.display_name}'s Valley Profile",
             description=description,
         )
         embed.set_thumbnail(url=ctx.author.avatar_url)
