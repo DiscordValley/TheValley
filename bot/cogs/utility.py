@@ -69,7 +69,7 @@ class Utility(commands.Cog):
         )
         embed.add_field(
             name="Server Configuration",
-            value=f"```\n" f"Prefix: {utils.get_guild_prefix(self.bot, ctx.guild.id)}\n" f"```",
+            value=f"```Prefix: {utils.get_guild_prefix(self.bot, ctx.guild.id)}\n```",
             inline=False,
         )
         embed.add_field(
