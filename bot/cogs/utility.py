@@ -55,7 +55,7 @@ class Utility(commands.Cog):
     async def info(self, ctx):
         """*Shows stats and infos about the bot*
         **Example**: `{prefix}info`"""
-        embed = discord.Embed(title="Daisy")
+        embed = discord.Embed(title="DiscordValley")
         # embed.url = f"https://top.gg/bot/{self.bot.user.id}"
         embed.set_thumbnail(url=self.bot.user.avatar_url)
         embed.add_field(
@@ -69,7 +69,7 @@ class Utility(commands.Cog):
         )
         embed.add_field(
             name="Server Configuration",
-            value=f"```\n" f"Prefix: {utils.config.prefix}\n" f"```",
+            value=f"```\n" f"Prefix: {utils.get_guild_prefix(self.bot, ctx.guild.id)}\n" f"```",
             inline=False,
         )
         embed.add_field(
