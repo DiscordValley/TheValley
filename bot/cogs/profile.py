@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from bot.game import Player, Farm
 from disputils import BotEmbedPaginator
+from typing import List
 
 
 def divide_chunks(lis, n):
@@ -42,45 +43,36 @@ class Profile(commands.Cog):
         player = await Player.load(
             user_id=ctx.author.id, guild_id=ctx.guild.id, load_inventory=True
         )
-        items = player.inventory.items.values()
-
+        items = list(player.inventory.items.values())
         if items:
             if len(items) > 5:
-                pages = list(divide_chunks(list(items), 5))
                 embeds = []
-                for p in pages:
-                    embed = discord.Embed(
-                        title="Inventory",
-                    )
-                    embed.set_footer(text=f"Inventory of {ctx.author}")
-
-                    for item in p:
-                        embed.add_field(
-                            name=f"**{item.quantity} - {item.name.capitalize()} - {item.cost}**",
-                            value=item.description,
-                            inline=False,
-                        )
-                    embeds.append(embed)
+                for p in divide_chunks(items, 5):
+                    embeds.append(self.create_inventory_page(ctx, p))
                 paginator = BotEmbedPaginator(ctx, embeds)
                 await paginator.run()
             else:
-                embed = discord.Embed(
-                    title="Inventory",
-                )
-                embed.set_footer(text=f"Inventory of {ctx.author}")
-                print("there has been a mistake")
-                for item in items:
-                    embed.add_field(
-                        name=f"**{item.quantity} - {item.name.capitalize()} - {item.cost}**",
-                        value=item.description,
-                        inline=False,
-                    )
-                await ctx.send(embed=embed)
+                await ctx.send(embed=self.create_inventory_page(ctx, items))
         else:
             embed = discord.Embed(
                 title="Inventory", description="Your inventory is empty."
             )
             await ctx.send(embed=embed)
+
+    @staticmethod
+    def create_inventory_page(ctx, items: List):
+        page = discord.Embed(
+            title="Inventory",
+        )
+        page.set_footer(text=f"Inventory of {ctx.author}")
+
+        for item in items:
+            page.add_field(
+                name=f"**{item.quantity} {item.name.capitalize()} - {item.cost} coins  **",
+                value=item.description,
+                inline=False,
+            )
+        return page
 
 
 def setup(bot):
