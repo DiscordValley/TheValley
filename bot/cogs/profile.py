@@ -1,6 +1,14 @@
 import discord
 from discord.ext import commands
-from bot.game import Player, Farm
+from bot.game import Player, Farm, InventoryItem
+from disputils import BotEmbedPaginator
+from typing import List
+from operator import attrgetter
+
+
+def divide_chunks(lis, n):
+    for i in range(0, len(lis), n):
+        yield lis[i : i + n]
 
 
 class Profile(commands.Cog):
@@ -32,16 +40,72 @@ class Profile(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def inventory(self, ctx):
+    async def inventory(self, ctx, criteria: str = None, order: str = None):
+        """*Inventory command that will show your inventory.*
+        **Example**: `{prefix}inventory`"""
         player = await Player.load(
             user_id=ctx.author.id, guild_id=ctx.guild.id, load_inventory=True
         )
-        embed = discord.Embed(title="Inventory")
-        embed.set_footer(text=f"Inventory of {ctx.author}")
-        for item in player.inventory.items.values():
-            embed.add_field(name=item.name.capitalize(), value=str(item.quantity))
+        sorting = ["lowest", "highest"]
+        items = list(player.inventory.items.values())
+        if criteria:
+            high_aliases = ["high", "h", "top", "hi"]
+            low_aliases = ["low", "l", "bottom", "lo"]
+            if order:
+                if order in high_aliases:
+                    sorting.reverse()
+                    items = self.sort_items(items, criteria, True)
+                elif order in low_aliases:
+                    items = self.sort_items(items, criteria, False)
+                else:
+                    embed = discord.Embed(
+                        description="The order was not recognised. Please try again."
+                    )
+                    await ctx.send(embed=embed)
+                    return
+            else:
+                items = self.sort_items(items, criteria, False)
+        if items:
+            if len(items) > 5:
+                embeds = []
+                for p in divide_chunks(items, 5):
+                    embeds.append(self.create_inventory_page(ctx, p, sorting))
+                paginator = BotEmbedPaginator(ctx, embeds)
+                await paginator.run()
+            else:
+                await ctx.send(embed=self.create_inventory_page(ctx, items))
+        else:
+            embed = discord.Embed(
+                title="Inventory", description="Your inventory is empty."
+            )
+            await ctx.send(embed=embed)
 
-        await ctx.send(embed=embed)
+    @staticmethod
+    def create_inventory_page(ctx, items: List, sorting: List[str] = None):
+        if sorting:
+            page = discord.Embed(
+                description=f"Sorting from {sorting[0]} to {sorting[1]}."
+            )
+        else:
+            page = discord.Embed()
+        page.set_footer(text=f"Inventory of {ctx.author}")
+
+        for item in items:
+            page.add_field(
+                name=f"**{item.quantity} {item.name.capitalize()} - {item.cost} coins  **",
+                value=item.description,
+                inline=False,
+            )
+        return page
+
+    @staticmethod
+    def sort_items(items: List, criteria: str, reverse: bool):
+        if criteria == "value":
+            return sorted(items, key=attrgetter("cost"), reverse=reverse)
+        elif criteria == "amount":
+            return sorted(items, key=lambda item: item.quantity, reverse=reverse)
+        else:
+            return None
 
 
 def setup(bot):
