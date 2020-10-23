@@ -41,6 +41,8 @@ class Profile(commands.Cog):
 
     @commands.command()
     async def inventory(self, ctx, criteria: str = None, order: str = None):
+        """*Inventory command that will show your inventory.*
+        **Example**: `{prefix}inventory`"""
         player = await Player.load(
             user_id=ctx.author.id, guild_id=ctx.guild.id, load_inventory=True
         )
