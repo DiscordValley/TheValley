@@ -91,7 +91,7 @@ class Farm:
                     await self.work_plot(
                         action=action, row=row, column=column, crop_id=crop_id
                     )
-        
+
         for coordinate in coordinates:
             await self.work_plot(
                 action=action,
@@ -111,15 +111,14 @@ class Farm:
             farm_land += "\n"
         embed = Embed(title=self.name, description=farm_land)
         return embed
-    
+
     def get_plots(self, planted: bool = True):
         crops = []
         for crop_row, row in enumerate(self.plot):
             for crop_column, crop in enumerate(row):
-                if planted and crop != None:
+                if planted and crop is not None:
                     crops.append(PlotCoordinate(crop_row, crop_column))
                 else:
                     if not planted and crop is None:
                         crops.append(PlotCoordinate(crop_row, crop_column))
         return crops if crops else None
-

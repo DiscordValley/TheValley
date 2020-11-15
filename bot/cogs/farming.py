@@ -1,10 +1,8 @@
 import discord
 from discord.ext import commands
-import re
-from typing import List
 
 from bot.game import Farm, Player
-from bot.utils.constants import PlotCoordinate, PlotActions, CROP_DATA
+from bot.utils.constants import PlotActions, CROP_DATA
 
 
 PLOT_NOT_FOUND = discord.Embed(
@@ -43,10 +41,7 @@ class Farming(commands.Cog):
     @commands.command(
         brief="*Harvest your crops*", help=INSTRUCTIONS.replace("[action]", "harvest")
     )
-    async def harvest(
-        self,
-        ctx
-    ):
+    async def harvest(self, ctx):
         await self.action(
             ctx,
             action=PlotActions.HARVEST,
@@ -55,11 +50,7 @@ class Farming(commands.Cog):
     @commands.command(
         brief="*Water your crops*", help=INSTRUCTIONS.replace("[action]", "water")
     )
-    async def water(
-        self,
-        ctx
-    ):
-        valid = True if catcher is None else False
+    async def water(self, ctx):
         await self.action(
             ctx,
             action=PlotActions.WATER,
@@ -68,13 +59,7 @@ class Farming(commands.Cog):
     @commands.command(
         brief="*Plant your crops*", help=INSTRUCTIONS.replace("[action]", "plant")
     )
-    async def plant(
-        self,
-        ctx,
-        crop_name: str,
-        amount: int
-    ):
-        valid = True if catcher is None else False
+    async def plant(self, ctx, crop_name: str, amount: int):
         await self.action(
             ctx,
             action=PlotActions.PLANT,
@@ -84,15 +69,12 @@ class Farming(commands.Cog):
 
     @staticmethod
     async def action(
-        ctx,
-        action: PlotActions,
-        crop_name: str = None,
-        amount: int = None
+        ctx, action: PlotActions, crop_name: str = None, amount: int = None
     ):
         player = await Player.load(user_id=ctx.author.id, guild_id=ctx.guild.id)
         farm = await Farm.load(player_id=player.id)
         coordinates = []
-        
+
         crop_id = None
         if action == PlotActions.PLANT:
             for key, value in CROP_DATA.items():
@@ -108,9 +90,7 @@ class Farming(commands.Cog):
             if action == PlotActions.HARVEST or action == PlotActions.WATER:
                 coordinates = farm.get_plots(planted=True)
 
-        await farm.work_plots(
-            action=action, coordinates=coordinates, crop_id=crop_id
-        )
+        await farm.work_plots(action=action, coordinates=coordinates, crop_id=crop_id)
 
         await ctx.send(embed=farm.display())
 
