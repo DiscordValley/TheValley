@@ -85,6 +85,13 @@ class Farm:
         coordinates: List[PlotCoordinate],
         crop_id: int = None,
     ):
+        if not coordinates:
+            for row in range(self.dimensions.rows):
+                for column in range(self.dimensions.columns):
+                    await self.work_plot(
+                        action=action, row=row, column=column, crop_id=crop_id
+                    )
+        
         for coordinate in coordinates:
             await self.work_plot(
                 action=action,
