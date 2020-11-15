@@ -15,54 +15,15 @@ CROP_NOT_FOUND = discord.Embed(
     description="The crop specified was not recognized. Please try again."
 )
 
+NO_AVAILABLE_PLOTS = discord.Emned(
+    description="There are no available plots at this time."
+)
+
 INSTRUCTIONS = """
         Usage:
             {prefix}[action] <plots>
         <plots> is optional, and can also be multiple arguments.
-        Rows are enumerated starting at '1'.
-        Columns are labeled starting at 'a'.
-        Example with 0's instead of plots:
-           a   b   c
-        1  0   0   0
-        2  0   0   0
-        3  0   0   0
-        <plots> can be a row, column or a specific plot.
-        Specific plot is specified by row number followed by column label.
-        (for example a1 for the top left plot.)
-        If <plots> is not specified, all plots will be [action]ed.
         """
-
-
-class PlotCoordinateConverter(commands.Converter):
-    async def convert(self, ctx, in_coordinate: str):
-        match_1a = re.match(r"([0-9]+)([A-Za-z]+)", in_coordinate, re.I)
-        match_a1 = re.match(r"([A-Za-z]+)([0-9]+)", in_coordinate, re.I)
-        if match_1a:
-            out_coordinate = match_1a.groups()
-            row = int(out_coordinate[0])
-            column = out_coordinate[1]
-        elif match_a1:
-            out_coordinate = match_a1.groups()
-            column = out_coordinate[0]
-            row = int(out_coordinate[1])
-        else:
-            match_a = re.match(r"[A-Za-z]+", in_coordinate, re.I)
-            match_1 = re.match(r"[0-9]+", in_coordinate, re.I)
-            if match_a:
-                out_coordinate = match_a.group()
-                column = out_coordinate[0]
-                row = None
-            elif match_1:
-                out_coordinate = match_1.group()
-                row = int(out_coordinate)
-                column = None
-            else:
-                raise ValueError
-        column = ord(column.lower()) - ord("a") if column else None
-        row = row - 1 if row else None
-        if (row and row < 0) or (column and column < 0):
-            raise ValueError
-        return PlotCoordinate(row, column)
 
 
 class Farming(commands.Cog):
@@ -84,17 +45,11 @@ class Farming(commands.Cog):
     )
     async def harvest(
         self,
-        ctx,
-        input_coordinates: commands.Greedy[PlotCoordinateConverter],
-        *,
-        catcher: str = None,
+        ctx
     ):
-        valid = True if catcher is None else False
         await self.action(
             ctx,
-            input_coordinates,
             action=PlotActions.HARVEST,
-            valid=valid,
         )
 
     @commands.command(
@@ -102,17 +57,12 @@ class Farming(commands.Cog):
     )
     async def water(
         self,
-        ctx,
-        input_coordinates: commands.Greedy[PlotCoordinateConverter],
-        *,
-        catcher: str = None,
+        ctx
     ):
         valid = True if catcher is None else False
         await self.action(
             ctx,
-            input_coordinates,
             action=PlotActions.WATER,
-            valid=valid,
         )
 
     @commands.command(
@@ -122,40 +72,27 @@ class Farming(commands.Cog):
         self,
         ctx,
         crop_name: str,
-        input_coordinates: commands.Greedy[PlotCoordinateConverter],
-        *,
-        catcher: str = None,
+        amount: int
     ):
         valid = True if catcher is None else False
         await self.action(
             ctx,
-            input_coordinates,
             action=PlotActions.PLANT,
-            valid=valid,
             crop_name=crop_name,
+            amount=amount,
         )
 
     @staticmethod
     async def action(
         ctx,
-        input_coordinates: List[PlotCoordinate],
         action: PlotActions,
         crop_name: str = None,
-        valid: bool = True,
+        amount: int = None
     ):
-        if not valid:
-            return await ctx.send(embed=PLOT_NOT_FOUND)
-
         player = await Player.load(user_id=ctx.author.id, guild_id=ctx.guild.id)
         farm = await Farm.load(player_id=player.id)
-
-        if input_coordinates:
-            for coordinate in input_coordinates:
-                if not farm.validate_coordinate(
-                    row=coordinate.row, column=coordinate.column
-                ):
-                    return await ctx.send(embed=PLOT_NOT_FOUND)
-
+        coordinates = []
+        
         crop_id = None
         if action == PlotActions.PLANT:
             for key, value in CROP_DATA.items():
@@ -164,9 +101,15 @@ class Farming(commands.Cog):
                     break
             if crop_id is None:
                 return await ctx.send(embed=CROP_NOT_FOUND)
+            coordinates = farm.get_plots(planted=False)
+            if amount < len(coordinates):
+                coordinates = coordinates[:amount]
+        else:
+            if action == PlotActions.HARVEST or action == PlotActions.WATER:
+                coordinates = farm.get_plots(planted=True)
 
         await farm.work_plots(
-            action=action, coordinates=input_coordinates, crop_id=crop_id
+            action=action, coordinates=coordinates, crop_id=crop_id
         )
 
         await ctx.send(embed=farm.display())
