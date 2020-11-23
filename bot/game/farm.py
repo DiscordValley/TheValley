@@ -93,29 +93,12 @@ class Farm:
                     )
 
         for coordinate in coordinates:
-            if coordinate.row is None and coordinate.column is not None:
-                for row in range(self.dimensions.rows):
-                    await self.work_plot(
-                        action=action,
-                        row=row,
-                        column=coordinate.column,
-                        crop_id=crop_id,
-                    )
-            elif coordinate.column is None and coordinate.row is not None:
-                for column in range(self.dimensions.columns):
-                    await self.work_plot(
-                        action=action,
-                        row=coordinate.row,
-                        column=column,
-                        crop_id=crop_id,
-                    )
-            elif coordinate.row and coordinate.column:
-                await self.work_plot(
-                    action=action,
-                    row=coordinate.row,
-                    column=coordinate.column,
-                    crop_id=crop_id,
-                )
+            await self.work_plot(
+                action=action,
+                row=coordinate.row,
+                column=coordinate.column,
+                crop_id=crop_id,
+            )
 
     def display(self):
         farm_land = ""
@@ -128,3 +111,14 @@ class Farm:
             farm_land += "\n"
         embed = Embed(title=self.name, description=farm_land)
         return embed
+
+    def get_plots(self, planted: bool = True):
+        crops = []
+        for crop_row, row in enumerate(self.plot):
+            for crop_column, crop in enumerate(row):
+                if planted and crop is not None:
+                    crops.append(PlotCoordinate(crop_row, crop_column))
+                else:
+                    if not planted and crop is None:
+                        crops.append(PlotCoordinate(crop_row, crop_column))
+        return crops if crops else None
